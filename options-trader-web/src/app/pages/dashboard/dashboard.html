@@ -1,0 +1,88 @@
+<div class="dashboard-layout">
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">&#9650;</span>
+      <span class="brand-name">OptionsTrader</span>
+    </div>
+    <ul class="sidebar-nav">
+      <li class="active">&#128197; Trading Journal</li>
+    </ul>
+  </nav>
+
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Trading Journal</h1>
+      <p>Click a day to view your trade charts</p>
+    </header>
+
+    <div class="calendar-card">
+      <div class="calendar-header">
+        <button class="nav-btn" (click)="prevMonth()">&#8249;</button>
+        <span class="month-label">{{ monthLabel() }}</span>
+        <button class="nav-btn" (click)="nextMonth()">&#8250;</button>
+      </div>
+
+      <div class="calendar-grid">
+        <div class="weekday-label" *ngFor="let day of weekDays">{{ day }}</div>
+
+        <ng-container *ngFor="let day of calendarDays()">
+          <div
+            *ngIf="day === null"
+            class="calendar-day empty"
+          ></div>
+          <div
+            *ngIf="day !== null"
+            class="calendar-day"
+            [class.profit]="day.tradingDay?.result === 'profit'"
+            [class.loss]="day.tradingDay?.result === 'loss'"
+            [class.today]="isToday(day)"
+            [class.clickable]="!!day.tradingDay"
+            (click)="openModal(day)"
+          >
+            <span class="day-number">{{ day.dayNumber }}</span>
+            <span *ngIf="day.tradingDay" class="day-badge">
+              {{ day.tradingDay.result === 'profit' ? '▲' : '▼' }}
+            </span>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="calendar-legend">
+        <span class="legend-item profit-legend">&#9632; Profit</span>
+        <span class="legend-item loss-legend">&#9632; Loss</span>
+        <span class="legend-item empty-legend">&#9632; No trade</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="selectedDay()" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ selectedDay()!.date }}</h2>
+      <span
+        class="modal-badge"
+        [class.profit]="selectedDay()!.result === 'profit'"
+        [class.loss]="selectedDay()!.result === 'loss'"
+      >
+        {{ selectedDay()!.result === 'profit' ? '▲ Profit' : '▼ Loss' }}
+      </span>
+      <button class="modal-close" (click)="closeModal()">&#10005;</button>
+    </div>
+
+    <div class="modal-main-image">
+      <img [src]="selectedDay()!.images[selectedImageIndex()]" alt="Trade chart" />
+    </div>
+
+    <div class="modal-thumbnails">
+      <img
+        *ngFor="let img of selectedDay()!.images; let i = index"
+        [src]="img"
+        [class.active]="selectedImageIndex() === i"
+        (click)="selectImage(i)"
+        alt="Chart {{ i + 1 }}"
+      />
+    </div>
+  </div>
+</div>
