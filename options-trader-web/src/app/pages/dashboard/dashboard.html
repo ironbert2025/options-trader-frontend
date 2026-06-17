@@ -26,10 +26,7 @@
         <div class="weekday-label" *ngFor="let day of weekDays">{{ day }}</div>
 
         <ng-container *ngFor="let day of calendarDays()">
-          <div
-            *ngIf="day === null"
-            class="calendar-day empty"
-          ></div>
+          <div *ngIf="day === null" class="calendar-day empty"></div>
           <div
             *ngIf="day !== null"
             class="calendar-day"
@@ -57,32 +54,63 @@
 </div>
 
 <!-- Modal -->
-<div class="modal-overlay" *ngIf="selectedDay()" (click)="closeModal()">
+<div class="modal-overlay" *ngIf="modalData()" (click)="closeModal()">
   <div class="modal" (click)="$event.stopPropagation()">
+
     <div class="modal-header">
-      <h2>{{ selectedDay()!.date }}</h2>
-      <span
-        class="modal-badge"
-        [class.profit]="selectedDay()!.result === 'profit'"
-        [class.loss]="selectedDay()!.result === 'loss'"
-      >
-        {{ selectedDay()!.result === 'profit' ? '▲ Profit' : '▼ Loss' }}
+      <button class="modal-back" *ngIf="selectedTrade()" (click)="backToTrades()">&#8592; Back</button>
+      <h2>{{ modalData()!.date }}</h2>
+      <span class="modal-badge" [class.profit]="modalData()!.result === 'profit'" [class.loss]="modalData()!.result === 'loss'">
+        {{ modalData()!.result === 'profit' ? '▲ Profit' : '▼ Loss' }}
       </span>
       <button class="modal-close" (click)="closeModal()">&#10005;</button>
     </div>
 
-    <div class="modal-main-image">
-      <img [src]="selectedDay()!.images[selectedImageIndex()]" alt="Trade chart" />
+    <!-- Loading -->
+    <div class="modal-loading" *ngIf="loadingModal()">
+      <span class="spinner"></span>
+      <p>Loading trades...</p>
     </div>
 
-    <div class="modal-thumbnails">
-      <img
-        *ngFor="let img of selectedDay()!.images; let i = index"
-        [src]="img"
-        [class.active]="selectedImageIndex() === i"
-        (click)="selectImage(i)"
-        alt="Chart {{ i + 1 }}"
-      />
+    <!-- Error -->
+    <div class="modal-error" *ngIf="!loadingModal() && modalError()">
+      <p>{{ modalError() }}</p>
     </div>
+
+    <!-- Trade list -->
+    <ng-container *ngIf="!loadingModal() && !modalError() && !selectedTrade()">
+      <div class="trade-list" *ngIf="modalData()!.trades.length > 0; else noTrades">
+        <button
+          class="trade-btn"
+          *ngFor="let trade of modalData()!.trades; let i = index"
+          (click)="selectTrade(trade)"
+        >
+          {{ trade.symbol }} {{ trade.optionType === 0 ? 'C' : 'P' }}
+        </button>
+      </div>
+      <ng-template #noTrades>
+        <div class="modal-empty"><p>No trades found for this day.</p></div>
+      </ng-template>
+    </ng-container>
+
+    <!-- Trade images -->
+    <ng-container *ngIf="!loadingModal() && selectedTrade()">
+      <div class="modal-main-image" *ngIf="tradeImages().length > 0">
+        <img [src]="tradeImages()[selectedImageIndex()].s3Url" alt="Trade chart" />
+      </div>
+      <div class="modal-thumbnails" *ngIf="tradeImages().length > 1">
+        <img
+          *ngFor="let img of tradeImages(); let i = index"
+          [src]="img.s3Url"
+          [class.active]="selectedImageIndex() === i"
+          (click)="selectImage(i)"
+          alt="Chart {{ i + 1 }}"
+        />
+      </div>
+      <div class="modal-empty" *ngIf="tradeImages().length === 0">
+        <p>No entry/exit images for this trade.</p>
+      </div>
+    </ng-container>
+
   </div>
 </div>
