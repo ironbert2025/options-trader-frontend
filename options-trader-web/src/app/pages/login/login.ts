@@ -1,16 +1,34 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [],
+  imports: [FormsModule, CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class Login {
-  constructor(private router: Router) {}
+  username = '';
+  password = '';
+  loading = signal(false);
+  error = signal('');
+
+  constructor(private router: Router, private auth: AuthService) {}
 
   onSubmit() {
-    this.router.navigate(['/dashboard']);
+    if (!this.username || !this.password) return;
+    this.loading.set(true);
+    this.error.set('');
+
+    this.auth.login(this.username, this.password).subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: () => {
+        this.error.set('Invalid username or password.');
+        this.loading.set(false);
+      },
+    });
   }
 }

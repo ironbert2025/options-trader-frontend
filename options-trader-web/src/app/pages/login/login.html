@@ -8,16 +8,20 @@
 
     <form class="login-form" (submit)="onSubmit(); $event.preventDefault()">
       <div class="form-group">
-        <label for="email">Email</label>
-        <input id="email" type="email" placeholder="you@example.com" />
+        <label for="username">Username</label>
+        <input id="username" type="text" placeholder="username" [(ngModel)]="username" name="username" />
       </div>
 
       <div class="form-group">
         <label for="password">Password</label>
-        <input id="password" type="password" placeholder="••••••••" />
+        <input id="password" type="password" placeholder="••••••••" [(ngModel)]="password" name="password" />
       </div>
 
-      <button type="submit" class="btn-submit">Sign In</button>
+      <p class="error-msg" *ngIf="error()">{{ error() }}</p>
+
+      <button type="submit" class="btn-submit" [disabled]="loading()">
+        {{ loading() ? 'Signing in...' : 'Sign In' }}
+      </button>
     </form>
   </div>
 </div>
