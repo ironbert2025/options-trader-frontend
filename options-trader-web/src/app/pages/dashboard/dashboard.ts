@@ -1,11 +1,18 @@
 import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MOCK_TRADING_DAYS, TradingDay } from '../../data/mock-trading-days';
+import { TradeService, Trade, TradeScreenshot } from '../../services/trade.service';
 
 interface CalendarDay {
   date: Date;
   dayNumber: number;
   tradingDay: TradingDay | null;
+}
+
+interface ModalData {
+  date: string;
+  result: 'profit' | 'loss';
+  trades: Trade[];
 }
 
 @Component({
@@ -19,8 +26,11 @@ export class Dashboard {
   currentYear = signal(this.today.getFullYear());
   currentMonth = signal(this.today.getMonth());
 
-  selectedDay = signal<TradingDay | null>(null);
+  modalData = signal<ModalData | null>(null);
+  selectedTrade = signal<Trade | null>(null);
   selectedImageIndex = signal(0);
+  loadingModal = signal(false);
+  modalError = signal('');
 
   monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -28,6 +38,8 @@ export class Dashboard {
   ];
 
   weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  constructor(private tradeService: TradeService) {}
 
   calendarDays = computed<(CalendarDay | null)[]>(() => {
     const year = this.currentYear();
@@ -55,6 +67,14 @@ export class Dashboard {
     `${this.monthNames[this.currentMonth()]} ${this.currentYear()}`
   );
 
+  tradeImages = computed<TradeScreenshot[]>(() => {
+    const trade = this.selectedTrade();
+    if (!trade) return [];
+    return trade.screenshots.filter(s =>
+      s.s3Url.endsWith('_entry.png') || s.s3Url.endsWith('_exit.png')
+    );
+  });
+
   prevMonth() {
     if (this.currentMonth() === 0) {
       this.currentMonth.set(11);
@@ -75,12 +95,39 @@ export class Dashboard {
 
   openModal(day: CalendarDay) {
     if (!day.tradingDay) return;
-    this.selectedDay.set(day.tradingDay);
+
+    const dateStr = day.tradingDay.date;
+    const result = day.tradingDay.result;
+
+    this.loadingModal.set(true);
+    this.modalError.set('');
+    this.modalData.set({ date: dateStr, result, trades: [] });
+    this.selectedTrade.set(null);
+
+    this.tradeService.getTradeByDate(dateStr).subscribe({
+      next: (trades) => {
+        this.modalData.set({ date: dateStr, result, trades });
+        this.loadingModal.set(false);
+      },
+      error: () => {
+        this.modalError.set('Could not load trades for this day.');
+        this.loadingModal.set(false);
+      },
+    });
+  }
+
+  selectTrade(trade: Trade) {
+    this.selectedTrade.set(trade);
     this.selectedImageIndex.set(0);
   }
 
+  backToTrades() {
+    this.selectedTrade.set(null);
+  }
+
   closeModal() {
-    this.selectedDay.set(null);
+    this.modalData.set(null);
+    this.selectedTrade.set(null);
   }
 
   selectImage(index: number) {
