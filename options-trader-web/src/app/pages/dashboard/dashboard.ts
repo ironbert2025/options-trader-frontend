@@ -1,12 +1,12 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { MOCK_TRADING_DAYS, TradingDay } from '../../data/mock-trading-days';
 import { TradeService, Trade, TradeScreenshot } from '../../services/trade.service';
 
 interface CalendarDay {
   date: Date;
   dayNumber: number;
-  tradingDay: TradingDay | null;
+  trades: Trade[];
+  result: 'profit' | 'loss' | null;
 }
 
 interface ModalData {
@@ -17,14 +17,17 @@ interface ModalData {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, DatePipe],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
   today = new Date();
   currentYear = signal(this.today.getFullYear());
   currentMonth = signal(this.today.getMonth());
+
+  monthTrades = signal<Trade[]>([]);
+  loadingCalendar = signal(false);
 
   modalData = signal<ModalData | null>(null);
   selectedTrade = signal<Trade | null>(null);
@@ -41,11 +44,33 @@ export class Dashboard {
 
   constructor(private tradeService: TradeService) {}
 
+  ngOnInit() {
+    this.loadMonth();
+  }
+
+  private loadMonth() {
+    const year = this.currentYear();
+    const month = this.currentMonth() + 1;
+    const monthStr = `${year}-${String(month).padStart(2, '0')}`;
+
+    this.loadingCalendar.set(true);
+    this.monthTrades.set([]);
+
+    this.tradeService.getTradesByMonth(monthStr).subscribe({
+      next: (trades) => {
+        this.monthTrades.set(trades);
+        this.loadingCalendar.set(false);
+      },
+      error: () => this.loadingCalendar.set(false),
+    });
+  }
+
   calendarDays = computed<(CalendarDay | null)[]>(() => {
     const year = this.currentYear();
     const month = this.currentMonth();
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const trades = this.monthTrades();
 
     const days: (CalendarDay | null)[] = [];
 
@@ -56,8 +81,15 @@ export class Dashboard {
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(year, month, d);
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      const tradingDay = MOCK_TRADING_DAYS.find(t => t.date === dateStr) ?? null;
-      days.push({ date, dayNumber: d, tradingDay });
+      const dayTrades = trades.filter(t => t.tradeDate === dateStr);
+
+      let result: 'profit' | 'loss' | null = null;
+      if (dayTrades.length > 0) {
+        const totalPnl = dayTrades.reduce((sum, t) => sum + t.pnl, 0);
+        result = totalPnl >= 0 ? 'profit' : 'loss';
+      }
+
+      days.push({ date, dayNumber: d, trades: dayTrades, result });
     }
 
     return days;
@@ -82,6 +114,7 @@ export class Dashboard {
     } else {
       this.currentMonth.update(m => m - 1);
     }
+    this.loadMonth();
   }
 
   nextMonth() {
@@ -91,29 +124,15 @@ export class Dashboard {
     } else {
       this.currentMonth.update(m => m + 1);
     }
+    this.loadMonth();
   }
 
   openModal(day: CalendarDay) {
-    if (!day.tradingDay) return;
-
-    const dateStr = day.tradingDay.date;
-    const result = day.tradingDay.result;
-
-    this.loadingModal.set(true);
-    this.modalError.set('');
-    this.modalData.set({ date: dateStr, result, trades: [] });
+    if (!day.result) return;
+    const dateStr = `${this.currentYear()}-${String(this.currentMonth() + 1).padStart(2, '0')}-${String(day.dayNumber).padStart(2, '0')}`;
+    this.modalData.set({ date: dateStr, result: day.result, trades: day.trades });
     this.selectedTrade.set(null);
-
-    this.tradeService.getTradeByDate(dateStr).subscribe({
-      next: (trades) => {
-        this.modalData.set({ date: dateStr, result, trades });
-        this.loadingModal.set(false);
-      },
-      error: () => {
-        this.modalError.set('Could not load trades for this day.');
-        this.loadingModal.set(false);
-      },
-    });
+    this.modalError.set('');
   }
 
   selectTrade(trade: Trade) {
