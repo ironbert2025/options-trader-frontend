@@ -58,12 +58,43 @@
   <div class="modal" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
-      <button class="modal-back" *ngIf="selectedTrade()" (click)="backToTrades()">&#8592; Back</button>
-      <h2>{{ modalData()!.date }}</h2>
-      <span class="modal-badge" [class.profit]="modalData()!.result === 'profit'" [class.loss]="modalData()!.result === 'loss'">
-        {{ modalData()!.result === 'profit' ? '▲ Profit' : '▼ Loss' }}
-      </span>
-      <button class="modal-close" (click)="closeModal()">&#10005;</button>
+      <div class="modal-header-top">
+        <button class="modal-back" *ngIf="selectedTrade()" (click)="backToTrades()">&#8592; Back</button>
+        <button class="modal-close" (click)="closeModal()">&#10005;</button>
+      </div>
+      <div class="modal-header-bottom">
+        <span class="modal-date-label">Trading Date: <strong>{{ modalData()!.date }}</strong></span>
+        <span class="modal-badge" [class.profit]="modalData()!.result === 'profit'" [class.loss]="modalData()!.result === 'loss'">
+          {{ modalData()!.result === 'profit' ? '▲ Profit' : '▼ Loss' }}
+        </span>
+      </div>
+      <hr class="modal-divider" *ngIf="selectedTrade()" />
+      <div class="modal-trade-info" *ngIf="selectedTrade()">
+        <span>Symbol: <strong>{{ selectedTrade()!.symbol }}</strong></span>
+        <span>Type: <strong>{{ selectedTrade()!.optionType === 0 ? 'Call' : 'Put' }}</strong></span>
+        <span>Strike: <strong>{{ selectedTrade()!.strikePrice }}</strong></span>
+        <span>Expiration: <strong>{{ selectedTrade()!.expirationDate | date:'yyyy-MM-dd' }}</strong></span>
+        <span>Level: <strong>{{ selectedTrade()!.level }}</strong></span>
+      </div>
+      <div class="modal-trade-info" *ngIf="selectedTrade()">
+        <span>Entry Price: <strong>{{ selectedTrade()!.entryPrice }}</strong></span>
+        <span>Exit Price: <strong>{{ selectedTrade()!.exitPrice }}</strong></span>
+        <span>PnL: <strong [class.pnl-positive]="selectedTrade()!.pnl >= 0" [class.pnl-negative]="selectedTrade()!.pnl < 0">{{ selectedTrade()!.pnl | number:'1.2-2' }} ({{ selectedTrade()!.pnlPercent | number:'1.2-2' }}%)</strong></span>
+        <span>Contracts: <strong>{{ selectedTrade()!.contracts }}</strong></span>
+        <span>Target(%): <strong>{{ selectedTrade()!.targetPercent }}</strong></span>
+      </div>
+      <div class="modal-trade-info" *ngIf="selectedTrade()">
+        <span>Premium: <strong>{{ selectedTrade()!.entryPrice * 100 * selectedTrade()!.contracts | number:'1.2-2' }}</strong></span>
+        <span *ngIf="selectedTrade()!.pnl < 0">
+          Loss: <strong class="pnl-negative">{{ selectedTrade()!.pnl * selectedTrade()!.contracts | number:'1.2-2' }}</strong>
+        </span>
+        <span *ngIf="selectedTrade()!.pnl >= 0">
+          Profit: <strong class="pnl-positive">{{ selectedTrade()!.pnl * selectedTrade()!.contracts | number:'1.2-2' }}</strong>
+        </span>
+      </div>
+      <div class="modal-trade-info" *ngIf="selectedTrade()">
+        <span>Duration: <strong>{{ selectedTrade()!.duration }}</strong></span>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -95,21 +126,15 @@
 
     <!-- Trade images -->
     <ng-container *ngIf="!loadingModal() && selectedTrade()">
-      <div class="modal-main-image" *ngIf="tradeImages().length > 0">
-        <img [src]="tradeImages()[selectedImageIndex()].s3Url" alt="Trade chart" />
+      <div class="modal-images-row" *ngIf="tradeImages().length > 0; else noImages">
+        <div class="modal-image-col" *ngFor="let img of tradeImages()">
+          <div class="image-label">{{ img.s3Url.includes('_entry') ? 'Entry' : 'Close' }}</div>
+          <img [src]="img.s3Url" alt="Trade chart" />
+        </div>
       </div>
-      <div class="modal-thumbnails" *ngIf="tradeImages().length > 1">
-        <img
-          *ngFor="let img of tradeImages(); let i = index"
-          [src]="img.s3Url"
-          [class.active]="selectedImageIndex() === i"
-          (click)="selectImage(i)"
-          alt="Chart {{ i + 1 }}"
-        />
-      </div>
-      <div class="modal-empty" *ngIf="tradeImages().length === 0">
-        <p>No entry/exit images for this trade.</p>
-      </div>
+      <ng-template #noImages>
+        <div class="modal-empty"><p>No entry/exit images for this trade.</p></div>
+      </ng-template>
     </ng-container>
 
   </div>

@@ -15,6 +15,16 @@ export interface Trade {
   id: number;
   symbol: string;
   optionType: number;
+  strikePrice: number;
+  expirationDate: string;
+  level: number;
+  entryPrice: number;
+  exitPrice: number;
+  pnl: number;
+  pnlPercent: number;
+  contracts: number;
+  targetPercent: number;
+  duration: string;
   screenshots: TradeScreenshot[];
 }
 

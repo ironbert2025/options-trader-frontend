@@ -1,5 +1,5 @@
 import { Component, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { MOCK_TRADING_DAYS, TradingDay } from '../../data/mock-trading-days';
 import { TradeService, Trade, TradeScreenshot } from '../../services/trade.service';
 
