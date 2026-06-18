@@ -25,6 +25,7 @@ export interface Trade {
   contracts: number;
   targetPercent: number;
   duration: string;
+  tradeDate: string;
   screenshots: TradeScreenshot[];
 }
 
@@ -33,6 +34,13 @@ export class TradeService {
   private readonly baseUrl = 'http://3.133.58.172:5000/api';
 
   constructor(private http: HttpClient, private auth: AuthService) {}
+
+  getTradesByMonth(month: string): Observable<Trade[]> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${this.auth.getToken()}`,
+    });
+    return this.http.get<Trade[]>(`${this.baseUrl}/trades?month=${month}`, { headers });
+  }
 
   getTradeByDate(date: string): Observable<Trade[]> {
     const headers = new HttpHeaders({
