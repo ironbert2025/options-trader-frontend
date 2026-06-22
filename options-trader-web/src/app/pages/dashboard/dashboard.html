@@ -139,6 +139,11 @@
       <ng-template #noImages>
         <div class="modal-empty"><p>No entry/exit images for this trade.</p></div>
       </ng-template>
+
+      <div class="modal-tradelog" *ngIf="tradeLogImage()">
+        <div class="image-label">Trade Log</div>
+        <img [src]="tradeLogImage()!.s3Url" alt="Trade log" />
+      </div>
     </ng-container>
 
   </div>

@@ -107,6 +107,12 @@ export class Dashboard implements OnInit {
     );
   });
 
+  tradeLogImage = computed<TradeScreenshot | null>(() => {
+    const trade = this.selectedTrade();
+    if (!trade) return null;
+    return trade.screenshots.find(s => s.s3Url.endsWith('_TradeLog.png')) ?? null;
+  });
+
   prevMonth() {
     if (this.currentMonth() === 0) {
       this.currentMonth.set(11);

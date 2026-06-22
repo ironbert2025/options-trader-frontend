@@ -328,6 +328,19 @@
   background: #f3f4f6;
 }
 
+.modal-tradelog {
+  margin-top: 0.75rem;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f3f4f6;
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+}
+
 .modal-image-col {
   flex: 1;
   border-radius: 8px;
