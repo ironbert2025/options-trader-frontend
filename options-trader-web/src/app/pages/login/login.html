@@ -1,26 +1,26 @@
 <div class="login-wrapper">
   <div class="login-card">
     <div class="login-header">
-      <span class="brand-icon">&#9650;</span>
-      <h1>OptionsTrader</h1>
-      <p>Sign in to your account</p>
+      <span class="brand-mark">&#9650;</span>
+      <h2>OptionsTrader</h2>
+      <p class="login-sub">Sign in to your account</p>
     </div>
 
     <form class="login-form" (submit)="onSubmit(); $event.preventDefault()">
       <div class="form-group">
         <label for="username">Username</label>
-        <input id="username" type="text" placeholder="username" [(ngModel)]="username" name="username" />
+        <input id="username" type="text" placeholder="username" [(ngModel)]="username" name="username" autocomplete="username" />
       </div>
 
       <div class="form-group">
         <label for="password">Password</label>
-        <input id="password" type="password" placeholder="••••••••" [(ngModel)]="password" name="password" />
+        <input id="password" type="password" placeholder="••••••••" [(ngModel)]="password" name="password" autocomplete="current-password" />
       </div>
 
       <p class="error-msg" *ngIf="error()">{{ error() }}</p>
 
       <button type="submit" class="btn-submit" [disabled]="loading()">
-        {{ loading() ? 'Signing in...' : 'Sign In' }}
+        {{ loading() ? 'Signing in…' : 'Sign In' }}
       </button>
     </form>
   </div>
