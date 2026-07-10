@@ -2,16 +2,18 @@ import { Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { TradeService, Trade, TradeScreenshot } from '../../services/trade.service';
 
+type TradeResult = 'profit' | 'loss' | 'pending';
+
 interface CalendarDay {
   date: Date;
   dayNumber: number;
   trades: Trade[];
-  result: 'profit' | 'loss' | null;
+  result: TradeResult | null;
 }
 
 interface ModalData {
   date: string;
-  result: 'profit' | 'loss';
+  result: TradeResult;
   trades: Trade[];
 }
 
@@ -83,10 +85,15 @@ export class Dashboard implements OnInit {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const dayTrades = trades.filter(t => t.tradeDate === dateStr);
 
-      let result: 'profit' | 'loss' | null = null;
+      let result: 'profit' | 'loss' | 'pending' | null = null;
       if (dayTrades.length > 0) {
-        const totalPnl = dayTrades.reduce((sum, t) => sum + t.pnl, 0);
-        result = totalPnl >= 0 ? 'profit' : 'loss';
+        const anyClosed = dayTrades.some(t => t.screenshots.some(s => s.s3Url.endsWith('_exit.png')));
+        if (anyClosed) {
+          const totalPnl = dayTrades.reduce((sum, t) => sum + t.pnl, 0);
+          result = totalPnl >= 0 ? 'profit' : 'loss';
+        } else {
+          result = 'pending';
+        }
       }
 
       days.push({ date, dayNumber: d, trades: dayTrades, result });
@@ -105,6 +112,26 @@ export class Dashboard implements OnInit {
     return trade.screenshots.filter(s =>
       s.s3Url.endsWith('_entry.png') || s.s3Url.endsWith('_exit.png')
     );
+  });
+
+  entryImage = computed<TradeScreenshot | null>(() => {
+    const trade = this.selectedTrade();
+    if (!trade) return null;
+    return trade.screenshots.find(s => s.s3Url.endsWith('_entry.png')) ?? null;
+  });
+
+  exitImage = computed<TradeScreenshot | null>(() => {
+    const trade = this.selectedTrade();
+    if (!trade) return null;
+    return trade.screenshots.find(s => s.s3Url.endsWith('_exit.png')) ?? null;
+  });
+
+  tradeStatus = computed<'pending' | 'closed-profit' | 'closed-loss'>(() => {
+    const trade = this.selectedTrade();
+    if (!trade) return 'pending';
+    const hasExit = trade.screenshots.some(s => s.s3Url.endsWith('_exit.png'));
+    if (!hasExit) return 'pending';
+    return trade.pnl >= 0 ? 'closed-profit' : 'closed-loss';
   });
 
   tradeLogImage = computed<TradeScreenshot | null>(() => {
@@ -136,7 +163,7 @@ export class Dashboard implements OnInit {
   openModal(day: CalendarDay) {
     if (!day.result) return;
     const dateStr = `${this.currentYear()}-${String(this.currentMonth() + 1).padStart(2, '0')}-${String(day.dayNumber).padStart(2, '0')}`;
-    this.modalData.set({ date: dateStr, result: day.result, trades: day.trades });
+    this.modalData.set({ date: dateStr, result: day.result!, trades: day.trades });
     this.selectedTrade.set(null);
     this.modalError.set('');
   }

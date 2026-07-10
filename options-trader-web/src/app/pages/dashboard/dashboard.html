@@ -36,13 +36,14 @@
             class="calendar-day"
             [class.profit]="day.result === 'profit'"
             [class.loss]="day.result === 'loss'"
+            [class.pending]="day.result === 'pending'"
             [class.today]="isToday(day)"
             [class.clickable]="!!day.result"
             (click)="openModal(day)"
           >
             <span class="day-number">{{ day.dayNumber }}</span>
             <span *ngIf="day.result" class="day-badge">
-              {{ day.result === 'profit' ? '▲' : '▼' }}
+              {{ day.result === 'profit' ? '▲' : day.result === 'loss' ? '▼' : '◉' }}
             </span>
           </div>
         </ng-container>
@@ -51,6 +52,7 @@
       <div class="calendar-legend">
         <span class="legend-item profit-legend">&#9632; Profit</span>
         <span class="legend-item loss-legend">&#9632; Loss</span>
+        <span class="legend-item pending-legend">&#9632; Pending</span>
         <span class="legend-item empty-legend">&#9632; No trade</span>
       </div>
     </div>
@@ -68,8 +70,11 @@
       </div>
       <div class="modal-header-bottom">
         <span class="modal-date-label">Trading Date: <strong>{{ modalData()!.date }}</strong></span>
-        <span class="modal-badge" [class.profit]="modalData()!.result === 'profit'" [class.loss]="modalData()!.result === 'loss'">
-          {{ modalData()!.result === 'profit' ? '▲ Profit' : '▼ Loss' }}
+        <span class="modal-badge"
+          [class.profit]="modalData()!.result === 'profit'"
+          [class.loss]="modalData()!.result === 'loss'"
+          [class.pending]="modalData()!.result === 'pending'">
+          {{ modalData()!.result === 'profit' ? '▲ Profit' : modalData()!.result === 'loss' ? '▼ Loss' : '◉ Pending' }}
         </span>
       </div>
       <hr class="modal-divider" *ngIf="selectedTrade()" />
@@ -94,6 +99,15 @@
         </span>
         <span *ngIf="selectedTrade()!.pnl >= 0">
           Profit: <strong class="pnl-positive">{{ selectedTrade()!.pnl * selectedTrade()!.contracts | number:'1.2-2' }}</strong>
+        </span>
+        <span>Status:
+          <strong
+            [class.status-pending]="tradeStatus() === 'pending'"
+            [class.status-closed-profit]="tradeStatus() === 'closed-profit'"
+            [class.status-closed-loss]="tradeStatus() === 'closed-loss'"
+          >
+            {{ tradeStatus() === 'pending' ? 'Pending' : 'Closed' }}
+          </strong>
         </span>
       </div>
       <div class="modal-trade-info" *ngIf="selectedTrade()">
@@ -131,9 +145,17 @@
     <!-- Trade images -->
     <ng-container *ngIf="!loadingModal() && selectedTrade()">
       <div class="modal-images-row" *ngIf="tradeImages().length > 0; else noImages">
-        <div class="modal-image-col" *ngFor="let img of tradeImages()">
-          <div class="image-label">{{ img.s3Url.includes('_entry') ? 'Entry' : 'Close' }}</div>
-          <img [src]="img.s3Url" alt="Trade chart" />
+        <div class="modal-image-col">
+          <ng-container *ngIf="entryImage()">
+            <div class="image-label">Entry</div>
+            <img [src]="entryImage()!.s3Url" alt="Entry chart" />
+          </ng-container>
+        </div>
+        <div class="modal-image-col">
+          <ng-container *ngIf="exitImage()">
+            <div class="image-label">Close</div>
+            <img [src]="exitImage()!.s3Url" alt="Close chart" />
+          </ng-container>
         </div>
       </div>
       <ng-template #noImages>

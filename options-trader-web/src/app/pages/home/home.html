@@ -1,48 +1,65 @@
 <nav class="navbar">
   <div class="navbar-brand">
-    <span class="brand-icon">&#9650;</span>
+    <span class="brand-mark">&#9650;</span>
     <span class="brand-name">OptionsTrader</span>
   </div>
   <ul class="navbar-links">
     <li><a href="#">Features</a></li>
     <li><a href="#">Markets</a></li>
     <li><a href="#">About</a></li>
-    <li><a routerLink="/login" class="btn-login">Log In</a></li>
+    <li><a routerLink="/login" class="btn-login">Sign In</a></li>
   </ul>
 </nav>
 
 <main>
   <section class="hero">
-    <h1>Trade Options.<br>Stay in Control.</h1>
-    <p class="hero-subtitle">
-      A professional-grade platform to monitor real-time quotes, execute trades,
-      and analyze your options portfolio — all in one place.
-    </p>
-    <div class="hero-actions">
-      <a routerLink="/login" class="btn-primary">Get Started</a>
-      <a href="#" class="btn-secondary">Learn More</a>
+    <div class="hero-content">
+      <span class="hero-eyebrow">Options Trading Journal</span>
+      <h1>Every trade<br>tells a story.</h1>
+      <p class="hero-sub">
+        Track every position, review your decisions, and build the discipline that separates consistent traders from everyone else.
+      </p>
+      <a routerLink="/login" class="btn-primary">Open Your Journal</a>
+    </div>
+
+    <div class="hero-visual">
+      <div class="mock-calendar">
+        <div class="mock-day profit">
+          <span class="mock-date">Jun 17</span>
+          <span class="mock-pnl">+$842</span>
+          <span class="mock-sym">AAPL C</span>
+        </div>
+        <div class="mock-day loss">
+          <span class="mock-date">Jun 18</span>
+          <span class="mock-pnl">−$310</span>
+          <span class="mock-sym">TSLA P</span>
+        </div>
+        <div class="mock-day profit">
+          <span class="mock-date">Jun 23</span>
+          <span class="mock-pnl">+$1,240</span>
+          <span class="mock-sym">SPY C</span>
+        </div>
+      </div>
+      <p class="mock-caption">Your real trade history, visualized by day</p>
     </div>
   </section>
 
   <section class="features">
     <div class="feature-card">
-      <div class="feature-icon">&#128200;</div>
-      <h3>Real-Time Quotes</h3>
-      <p>Monitor live option chains, bid/ask spreads, and Greeks updated every second from market data feeds.</p>
+      <h3>Calendar View</h3>
+      <p>Every trading day color-coded by outcome. Profit and loss at a glance — no spreadsheet required.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">&#9889;</div>
-      <h3>Instant Execution</h3>
-      <p>Place calls, puts, and complex spreads with one click. Orders route directly through your brokerage API.</p>
+      <h3>Trade Charts</h3>
+      <p>Entry and exit screenshots for every position. See exactly what you saw when you pulled the trigger.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">&#128203;</div>
-      <h3>Trade History</h3>
-      <p>Review every filled order, track P&amp;L over time, and export your trading history for tax reporting.</p>
+      <h3>P&amp;L Tracking</h3>
+      <p>Premium paid, net P&amp;L, duration, and target percent. The numbers don't lie — use them to improve.</p>
     </div>
   </section>
 </main>
 
 <footer class="footer">
-  <p>&copy; 2026 OptionsTrader. For personal use only.</p>
+  <p>&copy; 2026 OptionsTrader &mdash; Personal trading journal.</p>
 </footer>
