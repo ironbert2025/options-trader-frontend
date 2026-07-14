@@ -13,6 +13,8 @@ export interface TradeScreenshot {
 
 export interface Trade {
   id: number;
+  userId: number;
+  username: string;
   symbol: string;
   optionType: number;
   strikePrice: number;
