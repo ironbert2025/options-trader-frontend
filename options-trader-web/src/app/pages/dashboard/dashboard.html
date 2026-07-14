@@ -94,12 +94,6 @@
       </div>
       <div class="modal-trade-info" *ngIf="selectedTrade()">
         <span>Premium: <strong>{{ selectedTrade()!.entryPrice * 100 * selectedTrade()!.contracts | number:'1.2-2' }}</strong></span>
-        <span *ngIf="selectedTrade()!.pnl < 0">
-          Loss: <strong class="pnl-negative">{{ selectedTrade()!.pnl * selectedTrade()!.contracts | number:'1.2-2' }}</strong>
-        </span>
-        <span *ngIf="selectedTrade()!.pnl >= 0">
-          Profit: <strong class="pnl-positive">{{ selectedTrade()!.pnl * selectedTrade()!.contracts | number:'1.2-2' }}</strong>
-        </span>
         <span>Status:
           <strong
             [class.status-pending]="tradeStatus() === 'pending'"
