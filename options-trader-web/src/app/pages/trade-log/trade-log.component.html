@@ -128,7 +128,7 @@
                 <td class="entry-price">${{ trade.entryPrice }}</td>
                 <td class="exit-price">${{ trade.exitPrice }}</td>
                 <td>{{ trade.contracts }}</td>
-                <td>${{ trade.premium }}</td>
+                <td>${{ trade.premium | number:'1.0-0' }}</td>
                 <td [class.pnl-profit]="trade.pnl >= 0" [class.pnl-loss]="trade.pnl < 0">{{ formatPnlWithPercent(trade) }}</td>
                 <td class="dur">{{ trade.duration }}</td>
                 <td>
@@ -185,7 +185,7 @@
               <td class="entry-price">${{ trade.entryPrice }}</td>
               <td class="exit-price">${{ trade.exitPrice }}</td>
               <td>{{ trade.contracts }}</td>
-              <td>${{ trade.premium }}</td>
+              <td>${{ trade.premium | number:'1.0-0' }}</td>
               <td [class.pnl-profit]="trade.pnl >= 0" [class.pnl-loss]="trade.pnl < 0">{{ formatPnl(trade.pnl) }}</td>
               <td [class.pnl-profit]="trade.pnl >= 0" [class.pnl-loss]="trade.pnl < 0">{{ formatPercent(trade.pnlPercent) }}</td>
               <td class="dur">{{ trade.duration }}</td>
