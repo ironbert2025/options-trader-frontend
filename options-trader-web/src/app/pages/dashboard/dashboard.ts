@@ -106,14 +106,6 @@ export class Dashboard implements OnInit {
     `${this.monthNames[this.currentMonth()]} ${this.currentYear()}`
   );
 
-  tradeImages = computed<TradeScreenshot[]>(() => {
-    const trade = this.selectedTrade();
-    if (!trade) return [];
-    return trade.screenshots.filter(s =>
-      s.s3Url.endsWith('_entry.png') || s.s3Url.endsWith('_exit.png')
-    );
-  });
-
   entryImage = computed<TradeScreenshot | null>(() => {
     const trade = this.selectedTrade();
     if (!trade) return null;
@@ -124,6 +116,12 @@ export class Dashboard implements OnInit {
     const trade = this.selectedTrade();
     if (!trade) return null;
     return trade.screenshots.find(s => s.s3Url.endsWith('_exit.png')) ?? null;
+  });
+
+  dayTotalPnl = computed<number>(() => {
+    const data = this.modalData();
+    if (!data) return 0;
+    return data.trades.reduce((sum, t) => sum + t.pnl, 0);
   });
 
   tradeStatus = computed<'pending' | 'closed-profit' | 'closed-loss'>(() => {
