@@ -1,64 +1,8 @@
-<div class="dashboard-layout">
-  <nav class="sidebar">
-    <div class="sidebar-brand">
-      <i class="ti ti-triangle-filled"></i>
-      <span>OptionsTrader</span>
-    </div>
-    <div class="sidebar-item">
-      <i class="ti ti-calendar"></i>
-      <span>Trading Journal</span>
-    </div>
-  </nav>
-
-  <main class="main-content">
-    <header class="page-header">
-      <h1>Trading Journal</h1>
-      <p>Click a day to view your trade charts</p>
-    </header>
-
-    <div class="calendar-card">
-      <div class="calendar-header">
-        <button class="nav-btn" (click)="prevMonth()">&#8249;</button>
-        <span class="month-label">{{ monthLabel() }}</span>
-        <button class="nav-btn" (click)="nextMonth()">&#8250;</button>
-      </div>
-
-      <div class="calendar-loading" *ngIf="loadingCalendar()">
-        <span class="spinner"></span>
-      </div>
-
-      <div class="calendar-grid" *ngIf="!loadingCalendar()">
-        <div class="weekday-label" *ngFor="let day of weekDays">{{ day }}</div>
-
-        <ng-container *ngFor="let day of calendarDays()">
-          <div *ngIf="day === null" class="calendar-day empty"></div>
-          <div
-            *ngIf="day !== null"
-            class="calendar-day"
-            [class.profit]="day.result === 'profit'"
-            [class.loss]="day.result === 'loss'"
-            [class.pending]="day.result === 'pending'"
-            [class.has-trade]="!!day.result"
-            (click)="openModal(day)"
-          >
-            <div class="today-badge" *ngIf="isToday(day); else plainDayNum"><span>{{ day.dayNumber }}</span></div>
-            <ng-template #plainDayNum><span class="day-number">{{ day.dayNumber }}</span></ng-template>
-            <i class="ti ti-triangle-filled" *ngIf="day.result === 'profit'"></i>
-            <i class="ti ti-triangle-inverted-filled" *ngIf="day.result === 'loss'"></i>
-            <i class="ti ti-circle-filled" *ngIf="day.result === 'pending'"></i>
-          </div>
-        </ng-container>
-      </div>
-
-      <div class="calendar-legend">
-        <div class="legend-item"><div class="legend-line profit-line"></div><span>Profit</span></div>
-        <div class="legend-item"><div class="legend-line loss-line"></div><span>Loss</span></div>
-        <div class="legend-item"><div class="legend-line pending-line"></div><span>Pending</span></div>
-        <div class="legend-item"><div class="legend-line empty-line"></div><span>No trade</span></div>
-      </div>
-    </div>
-  </main>
-</div>
+<app-trading-journal
+  [tradeDays]="journalTradeDays()"
+  (dayClick)="onJournalDayClick($event)"
+  (monthChanged)="onJournalMonthChanged($event)"
+></app-trading-journal>
 
 <!-- Modal -->
 <div class="modal-overlay" *ngIf="modalData()" (click)="closeModal()">

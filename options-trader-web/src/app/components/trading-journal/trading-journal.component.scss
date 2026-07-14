@@ -1,0 +1,256 @@
+:host {
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.app {
+  display: flex;
+  width: 100%;
+  max-width: 980px;
+  min-height: 580px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+// ── Sidebar ──
+.sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  background: #1e2a3a;
+  padding: 1rem 0.75rem;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1.25rem;
+
+  i    { font-size: 14px; color: #f59e0b; }
+  span { font-size: 13px; font-weight: 500; color: #fff; }
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem 0.75rem;
+  background: #2a3a4f;
+  border-radius: 8px;
+
+  i    { font-size: 14px; color: #a3e635; }
+  span { font-size: 13px; font-weight: 500; color: #fff; }
+}
+
+// ── Main ──
+.main {
+  flex: 1;
+  background: #f1efe8;
+  padding: 1.25rem 1.5rem;
+}
+
+.main h1        { font-size: 20px; font-weight: 500; color: #2c2c2a; margin-bottom: 2px; }
+.main .subtitle { font-size: 12px; color: #888780; margin-bottom: 1rem; }
+
+// ── Monthly summary strip ──
+.monthly-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.monthly-metric {
+  background: #fff;
+  border: 0.5px solid #d3d1c7;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+
+  .label { font-size: 10px; color: #888780; margin-bottom: 2px; }
+  .value { font-size: 15px; font-weight: 500; color: #2c2c2a; }
+  .value.profit { color: #3b6d11; }
+  .value.loss   { color: #a32d2d; }
+}
+
+// ── Calendar card ──
+.cal-card {
+  background: #fff;
+  border: 0.5px solid #d3d1c7;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+
+  .month { font-size: 14px; font-weight: 500; color: #2c2c2a; }
+
+  button {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    border: 0.5px solid #d3d1c7;
+    background: #f1efe8;
+    cursor: pointer;
+    font-size: 13px;
+    color: #5f5e5a;
+    display: flex; align-items: center; justify-content: center;
+
+    &:hover { background: #e8e6df; }
+  }
+}
+
+// 8-column grid: 7 days + week summary
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr) 84px;
+  gap: 3px;
+}
+
+.cal-header {
+  text-align: center;
+  font-size: 9px;
+  font-weight: 500;
+  color: #888780;
+  letter-spacing: 0.05em;
+  padding: 2px 0;
+}
+
+.cal-day {
+  height: 62px;
+  border-radius: 7px;
+  background: #f1efe8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+
+  .num { font-size: 12px; color: #888780; }
+
+  &.profit, &.loss, &.pending {
+    flex-direction: column;
+    gap: 1px;
+    cursor: pointer;
+
+    &:hover { filter: brightness(0.97); }
+  }
+
+  &.profit {
+    background: #eaf3de;
+    border-top: 2.5px solid #639922;
+
+    .num { font-size: 12px; font-weight: 500; color: #3b6d11; }
+    .pnl { font-size: 9px; color: #3b6d11; }
+    .cnt { font-size: 9px; color: #888780; }
+  }
+
+  &.loss {
+    background: #fcebeb;
+    border-top: 2.5px solid #a32d2d;
+
+    .num { font-size: 12px; font-weight: 500; color: #a32d2d; }
+    .pnl { font-size: 9px; color: #a32d2d; }
+    .cnt { font-size: 9px; color: #888780; }
+  }
+
+  &.pending {
+    background: #faeeda;
+    border-top: 2.5px solid #ba7517;
+
+    .num { font-size: 12px; font-weight: 500; color: #854f0b; }
+    .pnl { font-size: 9px; color: #ba7517; }
+    .cnt { font-size: 9px; color: #888780; }
+  }
+}
+
+// Today badge
+.today-badge {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #f59e0b;
+  display: flex; align-items: center; justify-content: center;
+
+  span { font-size: 10px; font-weight: 500; color: #fff; }
+}
+
+// Weekly summary column
+.week-summary {
+  height: 62px;
+  border-radius: 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+
+  &.profit-week {
+    background: #eaf3de;
+    border: 0.5px solid #97c459;
+
+    .wlabel { font-size: 9px; color: #3b6d11; }
+    .wvalue { font-size: 11px; font-weight: 500; color: #3b6d11; }
+    .wcount { font-size: 9px; color: #3b6d11; }
+  }
+
+  &.loss-week {
+    background: #fcebeb;
+    border: 0.5px solid #f09595;
+
+    .wlabel { font-size: 9px; color: #a32d2d; }
+    .wvalue { font-size: 11px; font-weight: 500; color: #a32d2d; }
+    .wcount { font-size: 9px; color: #a32d2d; }
+  }
+
+  &.empty-week {
+    background: #f8f7f4;
+    border: 0.5px solid #d3d1c7;
+
+    .wlabel { font-size: 9px; color: #888780; }
+    .wvalue { font-size: 11px; font-weight: 500; color: #888780; }
+  }
+}
+
+// Legend
+.cal-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 0.5px solid #d3d1c7;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  span { font-size: 11px; color: #5f5e5a; }
+}
+
+.legend-line { width: 12px; height: 3px; border-radius: 2px; }
+
+.profit-line  { background: #639922; }
+.loss-line    { background: #a32d2d; }
+.pending-line { background: #ba7517; }
+.empty-line   { background: #d3d1c7; }
+
+.legend-week {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  span { font-size: 11px; color: #5f5e5a; }
+}
+
+.legend-week-box {
+  width: 10px; height: 10px;
+  background: #eaf3de;
+  border: 0.5px solid #97c459;
+  border-radius: 2px;
+}

@@ -1,0 +1,127 @@
+<div class="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <i class="ti ti-triangle-filled"></i>
+      <span>OptionsTrader</span>
+    </div>
+    <div class="sidebar-item">
+      <i class="ti ti-calendar"></i>
+      <span>Trading Journal</span>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <h1>Trading Journal</h1>
+    <p class="subtitle">Click a day to view your trade charts</p>
+
+    <!-- Monthly summary -->
+    <div class="monthly-grid">
+      <div class="monthly-metric">
+        <div class="label">Month PnL</div>
+        <div class="value" [class.profit]="monthSummary().monthPnl >= 0" [class.loss]="monthSummary().monthPnl < 0">
+          {{ formatPnl(monthSummary().monthPnl) }}
+        </div>
+      </div>
+      <div class="monthly-metric">
+        <div class="label">Trading days</div>
+        <div class="value">{{ monthSummary().tradingDays }} / {{ monthSummary().totalDays }}</div>
+      </div>
+      <div class="monthly-metric">
+        <div class="label">Win rate</div>
+        <div class="value">{{ monthSummary().winRate }}%</div>
+      </div>
+      <div class="monthly-metric">
+        <div class="label">Total trades</div>
+        <div class="value">{{ monthSummary().totalTrades }}</div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="cal-card">
+
+      <div class="cal-nav">
+        <button (click)="prevMonth()">&#8249;</button>
+        <span class="month">{{ monthLabel() }}</span>
+        <button (click)="nextMonth()">&#8250;</button>
+      </div>
+
+      <div class="cal-grid">
+
+        <!-- Headers -->
+        <div class="cal-header" *ngFor="let dayHeader of weekDayHeaders">{{ dayHeader }}</div>
+        <div class="cal-header">WEEK</div>
+
+        <!-- Rows -->
+        <ng-container *ngFor="let row of calendarRows(); let i = index">
+
+          <ng-container *ngFor="let day of row.days">
+            <div class="cal-day" *ngIf="day.dayNumber === null"></div>
+            <div
+              class="cal-day"
+              *ngIf="day.dayNumber !== null"
+              [class.profit]="day.status === 'profit'"
+              [class.loss]="day.status === 'loss'"
+              [class.pending]="day.status === 'pending'"
+              (click)="onDayClick(day)"
+            >
+              <div class="today-badge" *ngIf="day.isToday; else plainNum"><span>{{ day.dayNumber }}</span></div>
+              <ng-template #plainNum><span class="num">{{ day.dayNumber }}</span></ng-template>
+
+              <ng-container *ngIf="day.status !== 'none'">
+                <span class="pnl" *ngIf="day.status !== 'pending'">({{ formatPnl(day.pnl) }})</span>
+                <span class="pnl" *ngIf="day.status === 'pending'">(pend.)</span>
+                <span class="cnt">{{ day.tradeCount }}T</span>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <div
+            class="week-summary"
+            [class.profit-week]="row.week.status === 'profit'"
+            [class.loss-week]="row.week.status === 'loss'"
+            [class.empty-week]="row.week.status === 'empty'"
+          >
+            <span class="wlabel">W{{ i + 1 }}</span>
+            <ng-container *ngIf="row.week.status !== 'empty'; else emptyWeek">
+              <span class="wvalue">{{ formatPnl(row.week.totalPnl) }}</span>
+              <span class="wcount">{{ row.week.activeDays }}d &middot; {{ row.week.totalTrades }}T</span>
+            </ng-container>
+            <ng-template #emptyWeek>
+              <span class="wvalue">&mdash;</span>
+            </ng-template>
+          </div>
+
+        </ng-container>
+
+      </div>
+
+      <!-- Legend -->
+      <div class="cal-legend">
+        <div class="legend-item">
+          <div class="legend-line profit-line"></div>
+          <span>Profit</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-line loss-line"></div>
+          <span>Loss</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-line pending-line"></div>
+          <span>Pending</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-line empty-line"></div>
+          <span>No trade</span>
+        </div>
+        <div class="legend-week">
+          <div class="legend-week-box"></div>
+          <span>Weekly summary &middot; T = trades</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
