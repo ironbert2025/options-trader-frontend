@@ -1,15 +1,10 @@
 import { Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { TradeService, Trade, TradeScreenshot } from '../../services/trade.service';
+import { TradingJournalComponent } from '../../components/trading-journal/trading-journal.component';
+import { TradeDay } from '../../components/trading-journal/trading-journal.model';
 
 type TradeResult = 'profit' | 'loss' | 'pending';
-
-interface CalendarDay {
-  date: Date;
-  dayNumber: number;
-  trades: Trade[];
-  result: TradeResult | null;
-}
 
 interface ModalData {
   date: string;
@@ -19,7 +14,7 @@ interface ModalData {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule, DatePipe, TradingJournalComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -36,13 +31,6 @@ export class Dashboard implements OnInit {
   selectedImageIndex = signal(0);
   loadingModal = signal(false);
   modalError = signal('');
-
-  monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ];
-
-  weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   constructor(private tradeService: TradeService) {}
 
@@ -67,44 +55,30 @@ export class Dashboard implements OnInit {
     });
   }
 
-  calendarDays = computed<(CalendarDay | null)[]>(() => {
-    const year = this.currentYear();
-    const month = this.currentMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+  journalTradeDays = computed<TradeDay[]>(() => {
     const trades = this.monthTrades();
-
-    const days: (CalendarDay | null)[] = [];
-
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
+    const byDate = new Map<string, Trade[]>();
+    for (const t of trades) {
+      if (!byDate.has(t.tradeDate)) byDate.set(t.tradeDate, []);
+      byDate.get(t.tradeDate)!.push(t);
     }
 
-    for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(year, month, d);
-      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      const dayTrades = trades.filter(t => t.tradeDate === dateStr);
-
-      let result: 'profit' | 'loss' | 'pending' | null = null;
-      if (dayTrades.length > 0) {
-        const anyClosed = dayTrades.some(t => t.screenshots.some(s => s.s3Url.endsWith('_exit.png')));
-        if (anyClosed) {
-          const totalPnl = dayTrades.reduce((sum, t) => sum + t.pnl, 0);
-          result = totalPnl >= 0 ? 'profit' : 'loss';
-        } else {
-          result = 'pending';
-        }
+    const result: TradeDay[] = [];
+    for (const [dateStr, dayTrades] of byDate) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const anyClosed = dayTrades.some(t => t.screenshots.some(s => s.s3Url.endsWith('_exit.png')));
+      let status: TradeDay['status'];
+      let pnl = 0;
+      if (anyClosed) {
+        pnl = dayTrades.reduce((sum, t) => sum + t.pnl, 0);
+        status = pnl >= 0 ? 'profit' : 'loss';
+      } else {
+        status = 'pending';
       }
-
-      days.push({ date, dayNumber: d, trades: dayTrades, result });
+      result.push({ date: new Date(y, m - 1, d), status, pnl, tradeCount: dayTrades.length });
     }
-
-    return days;
+    return result;
   });
-
-  monthLabel = computed(() =>
-    `${this.monthNames[this.currentMonth()]} ${this.currentYear()}`
-  );
 
   entryImage = computed<TradeScreenshot | null>(() => {
     const trade = this.selectedTrade();
@@ -138,30 +112,27 @@ export class Dashboard implements OnInit {
     return trade.screenshots.find(s => s.s3Url.endsWith('_TradeLog.png')) ?? null;
   });
 
-  prevMonth() {
-    if (this.currentMonth() === 0) {
-      this.currentMonth.set(11);
-      this.currentYear.update(y => y - 1);
-    } else {
-      this.currentMonth.update(m => m - 1);
-    }
+  onJournalMonthChanged(e: { year: number; month: number }) {
+    this.currentYear.set(e.year);
+    this.currentMonth.set(e.month);
     this.loadMonth();
   }
 
-  nextMonth() {
-    if (this.currentMonth() === 11) {
-      this.currentMonth.set(0);
-      this.currentYear.update(y => y + 1);
-    } else {
-      this.currentMonth.update(m => m + 1);
-    }
-    this.loadMonth();
-  }
+  onJournalDayClick(date: Date) {
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const dayTrades = this.monthTrades().filter(t => t.tradeDate === dateStr);
+    if (dayTrades.length === 0) return;
 
-  openModal(day: CalendarDay) {
-    if (!day.result) return;
-    const dateStr = `${this.currentYear()}-${String(this.currentMonth() + 1).padStart(2, '0')}-${String(day.dayNumber).padStart(2, '0')}`;
-    this.modalData.set({ date: dateStr, result: day.result!, trades: day.trades });
+    const anyClosed = dayTrades.some(t => t.screenshots.some(s => s.s3Url.endsWith('_exit.png')));
+    let result: TradeResult;
+    if (anyClosed) {
+      const totalPnl = dayTrades.reduce((sum, t) => sum + t.pnl, 0);
+      result = totalPnl >= 0 ? 'profit' : 'loss';
+    } else {
+      result = 'pending';
+    }
+
+    this.modalData.set({ date: dateStr, result, trades: dayTrades });
     this.selectedTrade.set(null);
     this.modalError.set('');
   }
@@ -182,13 +153,5 @@ export class Dashboard implements OnInit {
 
   selectImage(index: number) {
     this.selectedImageIndex.set(index);
-  }
-
-  isToday(day: CalendarDay): boolean {
-    return (
-      day.date.getFullYear() === this.today.getFullYear() &&
-      day.date.getMonth() === this.today.getMonth() &&
-      day.date.getDate() === this.today.getDate()
-    );
   }
 }
