@@ -1,0 +1,171 @@
+<div class="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <i class="ti ti-triangle-filled"></i>
+      <span>OptionsTrader</span>
+    </div>
+    <a class="nav-item active" routerLink="/dashboard">
+      <i class="ti ti-layout-dashboard"></i>
+      <span>Dashboard</span>
+    </a>
+    <a class="nav-item" routerLink="/journal">
+      <i class="ti ti-calendar"></i>
+      <span>Trading Journal</span>
+    </a>
+    <span class="nav-item">
+      <i class="ti ti-chart-line"></i>
+      <span>Analytics</span>
+    </span>
+    <a class="nav-item" routerLink="/trades">
+      <i class="ti ti-list"></i>
+      <span>Trade Log</span>
+    </a>
+  </div>
+
+  <!-- Main -->
+  <div class="main" *ngIf="kpiSignal() as kpi">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p class="sub">{{ todayLabel() }}</p>
+      </div>
+      <div class="greeting-badge">
+        <i class="ti ti-sun"></i>
+        <span>{{ greeting() }}</span>
+      </div>
+    </div>
+
+    <!-- KPI strip -->
+    <div class="kpi-strip">
+      <div class="kpi-card highlight">
+        <div class="label">Month PnL</div>
+        <div class="value" [class.profit]="kpi.monthPnl >= 0" [class.loss]="kpi.monthPnl < 0">{{ formatPnl(kpi.monthPnl) }}</div>
+        <div class="sub-value" [class.up]="kpi.todayPnl >= 0" [class.down]="kpi.todayPnl < 0">
+          {{ kpi.todayPnl >= 0 ? '↑' : '↓' }} {{ formatPnl(kpi.todayPnl) }} today
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Today PnL</div>
+        <div class="value" [class.profit]="kpi.todayPnl >= 0" [class.loss]="kpi.todayPnl < 0">{{ formatPnl(kpi.todayPnl) }}</div>
+        <div class="sub-value">{{ todayTradesCount() }} trade{{ todayTradesCount() !== 1 ? 's' : '' }} closed</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Win rate</div>
+        <div class="value">{{ kpi.winRate }}%</div>
+        <div class="sub-value">{{ kpi.winningTrades }} of {{ kpi.totalTrades }} trades</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Current streak</div>
+        <div class="value">&#128293; {{ kpi.currentStreak }} days</div>
+        <div class="sub-value up">Best: {{ kpi.bestStreak }} days</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Avg trade PnL</div>
+        <div class="value" [class.profit]="kpi.avgTradePnl >= 0" [class.loss]="kpi.avgTradePnl < 0">{{ formatPnl(kpi.avgTradePnl) }}</div>
+        <div class="sub-value">Profit factor {{ kpi.profitFactor | number:'1.1-1' }}</div>
+      </div>
+    </div>
+
+    <!-- Row 1: Equity curve + Recent trades -->
+    <div class="grid-2" style="margin-bottom:8px;">
+
+      <!-- Equity curve -->
+      <div class="card">
+        <div class="card-title">
+          Equity curve &mdash; {{ monthNames[today.getMonth()] }} {{ today.getFullYear() }}
+          <a (click)="navigateToJournal()">View journal &rarr;</a>
+        </div>
+        <svg class="equity-svg" height="130" viewBox="0 0 380 130" preserveAspectRatio="none">
+          <line x1="0" y1="32" x2="380" y2="32" stroke="#f1efe8" stroke-width="1"/>
+          <line x1="0" y1="64" x2="380" y2="64" stroke="#f1efe8" stroke-width="1"/>
+          <line x1="0" y1="96" x2="380" y2="96" stroke="#f1efe8" stroke-width="1"/>
+          <polyline [attr.points]="equityFillPoints()" fill="#eaf3de" opacity="0.6"/>
+          <polyline [attr.points]="equitySvgPoints()" fill="none" stroke="#639922" stroke-width="2" stroke-linejoin="round"/>
+          <circle [attr.cx]="todayDotX()" [attr.cy]="todayDotY()" r="4" fill="#f59e0b" stroke="#fff" stroke-width="1.5"/>
+          <text x="2" y="128" font-size="8" fill="#888780" font-family="system-ui">Jul 1</text>
+          <text [attr.x]="todayDotX() - 20" y="128" font-size="8" fill="#f59e0b" font-family="system-ui">Today</text>
+          <text x="348" y="128" font-size="8" fill="#888780" font-family="system-ui">Jul 31</text>
+          <text x="2" y="12" font-size="8" fill="#3b6d11" font-family="system-ui">{{ equityMaxLabel() }}</text>
+          <text x="2" y="120" font-size="8" fill="#888780" font-family="system-ui">$0</text>
+        </svg>
+      </div>
+
+      <!-- Recent trades -->
+      <div class="card">
+        <div class="card-title">
+          Recent trades
+          <a (click)="navigateToTradeLog()">View all &rarr;</a>
+        </div>
+        <div class="trade-item" *ngFor="let trade of recentTradesSignal()" (click)="navigateToDetail(trade.id)">
+          <div class="trade-avatar"><span>{{ trade.symbol }}</span></div>
+          <div class="trade-info">
+            <div class="name">{{ trade.symbol }} {{ trade.type === 'Call' ? 'C' : 'P' }} &middot; {{ trade.strike }}</div>
+            <div class="meta">{{ monthNames[trade.date.getMonth()].slice(0,3) }} {{ trade.date.getDate() }} &middot; {{ trade.entryTime }} &middot; {{ trade.contracts }} contracts &middot; {{ trade.duration }}</div>
+          </div>
+          <div class="trade-pnl">
+            <div class="amount" [class.profit]="trade.pnl >= 0" [class.loss]="trade.pnl < 0">{{ formatPnl(trade.pnl) }}</div>
+            <div class="pct">{{ trade.pnlPercent | number:'1.1-1' }}%</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Row 2: Streak + Quick stats -->
+    <div class="grid-2">
+
+      <!-- Streak / consistency -->
+      <div class="streak-card">
+        <div class="card-title" style="margin-bottom:0.5rem;">Consistency &mdash; last 10 trading days</div>
+        <div class="day-dots">
+          <div class="day-dot-item" *ngFor="let day of consistencyDaysSignal()">
+            <div class="day-dot-circle"
+              [class.profit]="day.status === 'profit'"
+              [class.loss]="day.status === 'loss'"
+              [class.pending]="day.status === 'pending'"
+              [class.empty]="day.status === 'empty'"
+              [class.today]="day.isToday"
+            >
+              <i class="ti ti-triangle-filled" *ngIf="day.status === 'profit'"></i>
+              <i class="ti ti-triangle-inverted-filled" *ngIf="day.status === 'loss'"></i>
+              <i class="ti ti-circle-filled" *ngIf="day.status === 'pending'"></i>
+            </div>
+            <span class="day-dot-label" [class.today]="day.isToday">{{ day.label }}</span>
+          </div>
+        </div>
+        <hr class="divider"/>
+        <div class="streak-row">
+          <span class="streak-label">Current streak</span>
+          <span class="streak-value profit">&#128293; {{ kpiSignal()!.currentStreak }} profit days</span>
+        </div>
+        <div class="streak-row">
+          <span class="streak-label">Best streak this month</span>
+          <span class="streak-value">{{ kpiSignal()!.bestStreak }} days</span>
+        </div>
+        <div class="streak-row">
+          <span class="streak-label">Loss days</span>
+          <span class="streak-value loss">{{ lossDaysCount() }} day{{ lossDaysCount() !== 1 ? 's' : '' }} ({{ formatPnl(lossDaysTotal()) }} total)</span>
+        </div>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="card">
+        <div class="card-title">Quick stats</div>
+        <div class="stat-row">
+          <div class="stat-item" *ngFor="let stat of quickStatsSignal()">
+            <div>
+              <div class="s-label">{{ stat.label }}</div>
+              <div class="s-name">{{ stat.subLabel }}</div>
+            </div>
+            <span class="s-value" [class.profit]="stat.type === 'profit'" [class.loss]="stat.type === 'loss'">{{ stat.value }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

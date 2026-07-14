@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { TradeDay, WeekSummary, MonthSummary } from './trading-journal.model';
 
 interface CalendarCell {
@@ -19,7 +20,7 @@ interface CalendarRow {
 @Component({
   selector: 'app-trading-journal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './trading-journal.component.html',
   styleUrl: './trading-journal.component.scss',
 })
