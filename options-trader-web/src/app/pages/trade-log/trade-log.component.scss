@@ -1,0 +1,381 @@
+:host {
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.app {
+  display: flex;
+  width: 100%;
+  max-width: 1080px;
+  min-height: 600px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+// ── Sidebar ──
+.sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  background: #1e2a3a;
+  padding: 1rem 0.75rem;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1.5rem;
+
+  i    { font-size: 14px; color: #f59e0b; }
+  span { font-size: 13px; font-weight: 500; color: #fff; }
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  text-decoration: none;
+
+  i    { font-size: 14px; color: #ffffff50; }
+  span { font-size: 13px; color: #ffffff80; }
+
+  &:hover { background: #243447; }
+
+  &.active {
+    background: #2a3a4f;
+
+    i    { color: #a3e635; }
+    span { color: #fff; font-weight: 500; }
+  }
+}
+
+// ── Main ──
+.main {
+  flex: 1;
+  background: #f1efe8;
+  padding: 1.25rem 1.5rem;
+  overflow: hidden;
+}
+
+// ── Page header ──
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  h1   { font-size: 20px; font-weight: 500; color: #2c2c2a; margin-bottom: 2px; }
+  .sub { font-size: 12px; color: #888780; }
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+// Week navigator
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff;
+  border: 0.5px solid #d3d1c7;
+  border-radius: 8px;
+  padding: 3px 6px;
+
+  button {
+    width: 22px; height: 22px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #5f5e5a;
+    font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px;
+
+    &:hover { background: #f1efe8; }
+  }
+
+  .week-label { font-size: 11px; font-weight: 500; color: #2c2c2a; padding: 0 4px; }
+}
+
+// View toggle
+.view-toggle {
+  display: flex;
+  background: #fff;
+  border: 0.5px solid #d3d1c7;
+  border-radius: 8px;
+  overflow: hidden;
+
+  button {
+    padding: 5px 12px;
+    font-size: 11px;
+    border: none;
+    background: none;
+    color: #888780;
+    cursor: pointer;
+
+    &.active {
+      background: #1e2a3a;
+      color: #fff;
+      font-weight: 500;
+    }
+  }
+}
+
+// Filter pills
+.filter-pill {
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  border: 0.5px solid #d3d1c7;
+  background: #fff;
+  color: #888780;
+  cursor: pointer;
+
+  &.active-profit {
+    background: #eaf3de;
+    border-color: #97c459;
+    color: #3b6d11;
+  }
+
+  &.active-loss {
+    background: #fcebeb;
+    border-color: #f09595;
+    color: #a32d2d;
+  }
+}
+
+// ── Week summary strip ──
+.week-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.metric-card {
+  background: #fff;
+  border: 0.5px solid #d3d1c7;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+
+  .label { font-size: 10px; color: #888780; margin-bottom: 2px; }
+  .value { font-size: 15px; font-weight: 500; color: #2c2c2a; }
+  .value.profit { color: #3b6d11; }
+  .value.loss   { color: #a32d2d; }
+}
+
+// ── Day groups ──
+.day-groups { display: flex; flex-direction: column; gap: 8px; }
+
+.day-group {
+  background: #fff;
+  border: 0.5px solid #d3d1c7;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.day-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: #f8f7f4;
+  border-bottom: 0.5px solid #d3d1c7;
+  cursor: pointer;
+
+  &:hover { background: #f1efe8; }
+}
+
+.day-header-left  { display: flex; align-items: center; gap: 8px; }
+
+.day-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &.profit { background: #639922; }
+  &.loss   { background: #a32d2d; }
+  &.empty  { background: #d3d1c7; }
+}
+
+.day-name  { font-size: 12px; font-weight: 500; color: #2c2c2a; }
+.day-count { font-size: 10px; color: #888780; }
+
+.day-header-right { display: flex; align-items: center; gap: 10px; }
+
+.day-total {
+  font-size: 12px;
+  font-weight: 500;
+
+  &.profit { color: #3b6d11; }
+  &.loss   { color: #a32d2d; }
+}
+
+.day-total-label { font-size: 10px; color: #888780; }
+
+// ── Trade table ──
+.trade-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  table-layout: fixed;
+
+  thead tr { border-bottom: 0.5px solid #f1efe8; }
+
+  th {
+    padding: 6px 8px;
+    color: #888780;
+    font-weight: 500;
+    text-align: right;
+
+    &:first-child { padding-left: 14px; text-align: left; }
+    &:nth-child(2), &:nth-child(3) { text-align: left; }
+    &:last-child { padding-right: 14px; }
+  }
+
+  tbody tr {
+    border-bottom: 0.5px solid #f1efe8;
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: #f8f7f4; }
+  }
+
+  td {
+    padding: 7px 8px;
+    text-align: right;
+    color: #2c2c2a;
+
+    &:first-child { padding-left: 14px; text-align: left; color: #888780; }
+    &:nth-child(2) { font-weight: 500; text-align: left; }
+    &:nth-child(3) { text-align: left; color: #888780; }
+    &:last-child { padding-right: 14px; }
+  }
+}
+
+.entry-price { color: #185fa5 !important; }
+.exit-price  { color: #ba7517 !important; }
+.pnl-profit  { color: #3b6d11 !important; font-weight: 500; }
+.pnl-loss    { color: #a32d2d !important; font-weight: 500; }
+.dur         { color: #888780 !important; }
+
+.status-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-block;
+
+  &.closed  { background: #eaf3de; color: #27500a; }
+  &.loss    { background: #fcebeb; color: #791f1f; }
+  &.pending { background: #faeeda; color: #633806; }
+}
+
+// ── Empty day ──
+.empty-day {
+  background: #fff;
+  border: 0.5px dashed #d3d1c7;
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.empty-day-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  span { font-size: 12px; color: #888780; }
+}
+
+.empty-day-right { font-size: 11px; color: #d3d1c7; }
+
+// ── Month view ──
+.month-table-wrap {
+  background: #fff;
+  border: 0.5px solid #d3d1c7;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.month-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  table-layout: fixed;
+
+  thead tr { background: #f1efe8; border-bottom: 0.5px solid #d3d1c7; }
+
+  th {
+    padding: 8px 8px;
+    color: #888780;
+    font-weight: 500;
+    text-align: right;
+
+    &:first-child { padding-left: 14px; text-align: left; }
+    &:nth-child(2), &:nth-child(3) { text-align: left; }
+    &:last-child { padding-right: 14px; }
+  }
+
+  tbody tr {
+    border-bottom: 0.5px solid #f1efe8;
+    cursor: pointer;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: #f8f7f4; }
+  }
+
+  td {
+    padding: 7px 8px;
+    text-align: right;
+    color: #2c2c2a;
+
+    &:first-child { padding-left: 14px; text-align: left; }
+    &:nth-child(2) { font-weight: 500; text-align: left; }
+    &:nth-child(3) { text-align: left; color: #888780; }
+    &:last-child { padding-right: 14px; }
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+
+  span { font-size: 11px; color: #888780; }
+}
+
+.pagination-btns {
+  display: flex;
+  gap: 4px;
+
+  button {
+    padding: 4px 10px;
+    font-size: 11px;
+    border: 0.5px solid #d3d1c7;
+    border-radius: 6px;
+    background: #fff;
+    color: #888780;
+    cursor: pointer;
+
+    &.active {
+      background: #1e2a3a;
+      color: #fff;
+      border-color: #1e2a3a;
+    }
+  }
+}

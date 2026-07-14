@@ -1,0 +1,214 @@
+<div class="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <i class="ti ti-triangle-filled"></i>
+      <span>OptionsTrader</span>
+    </div>
+    <a class="nav-item" routerLink="/dashboard">
+      <i class="ti ti-layout-dashboard"></i>
+      <span>Dashboard</span>
+    </a>
+    <a class="nav-item" routerLink="/dashboard">
+      <i class="ti ti-calendar"></i>
+      <span>Trading Journal</span>
+    </a>
+    <span class="nav-item">
+      <i class="ti ti-chart-line"></i>
+      <span>Analytics</span>
+    </span>
+    <a class="nav-item active" routerLink="/trades">
+      <i class="ti ti-list"></i>
+      <span>Trade Log</span>
+    </a>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h1>Trade Log</h1>
+        <p class="sub">{{ pageSubtitle() }}</p>
+      </div>
+      <div class="header-controls">
+
+        <!-- Week nav -->
+        <div class="week-nav" *ngIf="viewMode() === 'week'">
+          <button (click)="prevWeek()">&#8249;</button>
+          <span class="week-label">{{ currentWeek()?.label }}</span>
+          <button (click)="nextWeek()">&#8250;</button>
+        </div>
+
+        <!-- View toggle -->
+        <div class="view-toggle">
+          <button [class.active]="viewMode() === 'week'" (click)="setView('week')">Week</button>
+          <button [class.active]="viewMode() === 'month'" (click)="setView('month')">Month</button>
+        </div>
+
+        <!-- Filters -->
+        <button class="filter-pill" [class.active-profit]="activeFilter() === 'profit'" (click)="setFilter('profit')">Profit</button>
+        <button class="filter-pill" [class.active-loss]="activeFilter() === 'loss'" (click)="setFilter('loss')">Loss</button>
+        <button class="filter-pill" (click)="setFilter('all')">All</button>
+
+      </div>
+    </div>
+
+    <!-- Week summary strip -->
+    <div class="week-summary" *ngIf="viewMode() === 'week' && currentWeek() as week">
+      <div class="metric-card">
+        <div class="label">Week PnL</div>
+        <div class="value" [class.profit]="week.totalPnl >= 0" [class.loss]="week.totalPnl < 0">
+          {{ week.activeDays > 0 ? formatPnl(week.totalPnl) : '&mdash;' }}
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Active days</div>
+        <div class="value">{{ week.activeDays }} / {{ week.dayGroups.length }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Trades</div>
+        <div class="value">{{ week.totalTrades }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Win rate</div>
+        <div class="value">{{ week.activeDays > 0 ? week.winRate + '%' : '&mdash;' }}</div>
+      </div>
+    </div>
+
+    <!-- WEEK VIEW -->
+    <div class="week-view day-groups" *ngIf="viewMode() === 'week'">
+
+      <ng-container *ngFor="let row of weekDisplayRows(); let i = index">
+
+        <!-- Day with trades -->
+        <div class="day-group" *ngIf="row.kind === 'day'">
+          <div class="day-group-header" (click)="toggleDayGroup(i)">
+            <div class="day-header-left">
+              <div class="day-dot"
+                [class.profit]="row.group!.status === 'profit'"
+                [class.loss]="row.group!.status === 'loss'"
+                [class.empty]="row.group!.status === 'empty'"
+              ></div>
+              <span class="day-name">{{ row.group!.label }}</span>
+              <span class="day-count">{{ row.group!.trades.length }} trade{{ row.group!.trades.length !== 1 ? 's' : '' }}</span>
+            </div>
+            <div class="day-header-right">
+              <span class="day-total" [class.profit]="row.group!.dayPnl >= 0" [class.loss]="row.group!.dayPnl < 0">
+                {{ formatPnl(row.group!.dayPnl) }}
+              </span>
+              <span class="day-total-label">(day total)</span>
+            </div>
+          </div>
+
+          <table class="trade-table" *ngIf="!isCollapsed(i)">
+            <thead>
+              <tr>
+                <th style="width:60px;text-align:left;">Time</th>
+                <th style="width:50px;">Symbol</th>
+                <th style="width:45px;">Type</th>
+                <th style="width:50px;">Strike</th>
+                <th style="width:50px;">Entry</th>
+                <th style="width:50px;">Exit</th>
+                <th style="width:38px;">Qty</th>
+                <th style="width:60px;">Premium</th>
+                <th style="width:100px;">PnL</th>
+                <th style="width:55px;">Duration</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let trade of row.group!.trades" (click)="navigateToDetail(trade.id)">
+                <td>{{ trade.entryTime }}</td>
+                <td>{{ trade.symbol }}</td>
+                <td>{{ trade.type }}</td>
+                <td>{{ trade.strike }}</td>
+                <td class="entry-price">${{ trade.entryPrice }}</td>
+                <td class="exit-price">${{ trade.exitPrice }}</td>
+                <td>{{ trade.contracts }}</td>
+                <td>${{ trade.premium }}</td>
+                <td [class.pnl-profit]="trade.pnl >= 0" [class.pnl-loss]="trade.pnl < 0">{{ formatPnlWithPercent(trade) }}</td>
+                <td class="dur">{{ trade.duration }}</td>
+                <td>
+                  <span class="status-badge"
+                    [class.closed]="trade.status === 'Closed' && trade.pnl >= 0"
+                    [class.loss]="trade.status === 'Closed' && trade.pnl < 0"
+                    [class.pending]="trade.status === 'Pending'"
+                  >{{ trade.status }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty day range -->
+        <div class="empty-day" *ngIf="row.kind === 'empty-range'">
+          <div class="empty-day-left">
+            <div class="day-dot empty"></div>
+            <span>{{ row.startLabel }}<ng-container *ngIf="row.startLabel !== row.endLabel"> &mdash; {{ row.endLabel }}</ng-container></span>
+          </div>
+          <span class="empty-day-right">No trades</span>
+        </div>
+
+      </ng-container>
+
+    </div>
+
+    <!-- MONTH VIEW -->
+    <div class="month-view" *ngIf="viewMode() === 'month'">
+      <div class="month-table-wrap">
+        <table class="month-table">
+          <thead>
+            <tr>
+              <th style="width:70px;">Date</th>
+              <th style="width:55px;">Symbol</th>
+              <th style="width:45px;">Type</th>
+              <th style="width:50px;">Strike</th>
+              <th style="width:50px;">Entry</th>
+              <th style="width:50px;">Exit</th>
+              <th style="width:38px;">Qty</th>
+              <th style="width:60px;">Premium</th>
+              <th style="width:90px;">PnL</th>
+              <th style="width:45px;">%</th>
+              <th style="width:55px;">Duration</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let trade of paginatedMonthTrades()" (click)="navigateToDetail(trade.id)">
+              <td>{{ trade.date.getDate() }}</td>
+              <td>{{ trade.symbol }}</td>
+              <td>{{ trade.type }}</td>
+              <td>{{ trade.strike }}</td>
+              <td class="entry-price">${{ trade.entryPrice }}</td>
+              <td class="exit-price">${{ trade.exitPrice }}</td>
+              <td>{{ trade.contracts }}</td>
+              <td>${{ trade.premium }}</td>
+              <td [class.pnl-profit]="trade.pnl >= 0" [class.pnl-loss]="trade.pnl < 0">{{ formatPnl(trade.pnl) }}</td>
+              <td [class.pnl-profit]="trade.pnl >= 0" [class.pnl-loss]="trade.pnl < 0">{{ formatPercent(trade.pnlPercent) }}</td>
+              <td class="dur">{{ trade.duration }}</td>
+              <td>
+                <span class="status-badge"
+                  [class.closed]="trade.status === 'Closed' && trade.pnl >= 0"
+                  [class.loss]="trade.status === 'Closed' && trade.pnl < 0"
+                  [class.pending]="trade.status === 'Pending'"
+                >{{ trade.status }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span>Showing {{ paginatedMonthTrades().length }} of {{ monthTrades().length }} trades</span>
+        <div class="pagination-btns">
+          <button (click)="goToPage(currentPage() - 1)">Prev</button>
+          <button *ngFor="let page of pageNumbers()" [class.active]="currentPage() === page" (click)="goToPage(page)">{{ page }}</button>
+          <button (click)="goToPage(currentPage() + 1)">Next</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
