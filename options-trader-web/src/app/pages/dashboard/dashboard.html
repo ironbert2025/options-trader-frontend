@@ -1,12 +1,13 @@
 <div class="dashboard-layout">
   <nav class="sidebar">
     <div class="sidebar-brand">
-      <span class="brand-icon">&#9650;</span>
-      <span class="brand-name">OptionsTrader</span>
+      <i class="ti ti-triangle-filled"></i>
+      <span>OptionsTrader</span>
     </div>
-    <ul class="sidebar-nav">
-      <li class="active">&#128197; Trading Journal</li>
-    </ul>
+    <div class="sidebar-item">
+      <i class="ti ti-calendar"></i>
+      <span>Trading Journal</span>
+    </div>
   </nav>
 
   <main class="main-content">
@@ -37,23 +38,23 @@
             [class.profit]="day.result === 'profit'"
             [class.loss]="day.result === 'loss'"
             [class.pending]="day.result === 'pending'"
-            [class.today]="isToday(day)"
-            [class.clickable]="!!day.result"
+            [class.has-trade]="!!day.result"
             (click)="openModal(day)"
           >
-            <span class="day-number">{{ day.dayNumber }}</span>
-            <span *ngIf="day.result" class="day-badge">
-              {{ day.result === 'profit' ? '▲' : day.result === 'loss' ? '▼' : '◉' }}
-            </span>
+            <div class="today-badge" *ngIf="isToday(day); else plainDayNum"><span>{{ day.dayNumber }}</span></div>
+            <ng-template #plainDayNum><span class="day-number">{{ day.dayNumber }}</span></ng-template>
+            <i class="ti ti-triangle-filled" *ngIf="day.result === 'profit'"></i>
+            <i class="ti ti-triangle-inverted-filled" *ngIf="day.result === 'loss'"></i>
+            <i class="ti ti-circle-filled" *ngIf="day.result === 'pending'"></i>
           </div>
         </ng-container>
       </div>
 
       <div class="calendar-legend">
-        <span class="legend-item profit-legend">&#9632; Profit</span>
-        <span class="legend-item loss-legend">&#9632; Loss</span>
-        <span class="legend-item pending-legend">&#9632; Pending</span>
-        <span class="legend-item empty-legend">&#9632; No trade</span>
+        <div class="legend-item"><div class="legend-line profit-line"></div><span>Profit</span></div>
+        <div class="legend-item"><div class="legend-line loss-line"></div><span>Loss</span></div>
+        <div class="legend-item"><div class="legend-line pending-line"></div><span>Pending</span></div>
+        <div class="legend-item"><div class="legend-line empty-line"></div><span>No trade</span></div>
       </div>
     </div>
   </main>
@@ -64,48 +65,28 @@
   <div class="modal" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
-      <div class="modal-header-top">
-        <button class="modal-back" *ngIf="selectedTrade()" (click)="backToTrades()">&#8592; Back</button>
-        <button class="modal-close" (click)="closeModal()">&#10005;</button>
+      <button class="modal-close" (click)="closeModal()">&#10005;</button>
+
+      <div class="list-header" *ngIf="!selectedTrade()">
+        <span class="modal-date-label">Trading date</span>
+        <span class="modal-date-value">{{ modalData()!.date }}</span>
       </div>
-      <div class="modal-header-bottom">
-        <span class="modal-date-label">Trading Date: <strong>{{ modalData()!.date }}</strong></span>
-        <span class="modal-badge"
-          [class.profit]="modalData()!.result === 'profit'"
-          [class.loss]="modalData()!.result === 'loss'"
-          [class.pending]="modalData()!.result === 'pending'">
-          {{ modalData()!.result === 'profit' ? '▲ Profit' : modalData()!.result === 'loss' ? '▼ Loss' : '◉ Pending' }}
-        </span>
-      </div>
-      <hr class="modal-divider" *ngIf="selectedTrade()" />
-      <div class="modal-trade-info" *ngIf="selectedTrade()">
-        <span>Symbol: <strong>{{ selectedTrade()!.symbol }}</strong></span>
-        <span>Type: <strong>{{ selectedTrade()!.optionType === 0 ? 'Call' : 'Put' }}</strong></span>
-        <span>Strike: <strong>{{ selectedTrade()!.strikePrice }}</strong></span>
-        <span>Expiration: <strong>{{ selectedTrade()!.expirationDate | date:'yyyy-MM-dd' }}</strong></span>
-        <span>Level: <strong>{{ selectedTrade()!.level }}</strong></span>
-      </div>
-      <div class="modal-trade-info" *ngIf="selectedTrade()">
-        <span>Entry Price: <strong>{{ selectedTrade()!.entryPrice }}</strong></span>
-        <span>Exit Price: <strong>{{ selectedTrade()!.exitPrice }}</strong></span>
-        <span>PnL: <strong [class.pnl-positive]="selectedTrade()!.pnl >= 0" [class.pnl-negative]="selectedTrade()!.pnl < 0">{{ selectedTrade()!.pnl | number:'1.2-2' }} ({{ selectedTrade()!.pnlPercent | number:'1.2-2' }}%)</strong></span>
-        <span>Contracts: <strong>{{ selectedTrade()!.contracts }}</strong></span>
-        <span>Target(%): <strong>{{ selectedTrade()!.targetPercent }}</strong></span>
-      </div>
-      <div class="modal-trade-info" *ngIf="selectedTrade()">
-        <span>Premium: <strong>{{ selectedTrade()!.entryPrice * 100 * selectedTrade()!.contracts | number:'1.2-2' }}</strong></span>
-        <span>Status:
-          <strong
-            [class.status-pending]="tradeStatus() === 'pending'"
-            [class.status-closed-profit]="tradeStatus() === 'closed-profit'"
-            [class.status-closed-loss]="tradeStatus() === 'closed-loss'"
-          >
-            {{ tradeStatus() === 'pending' ? 'Pending' : 'Closed' }}
-          </strong>
-        </span>
-      </div>
-      <div class="modal-trade-info" *ngIf="selectedTrade()">
-        <span>Duration: <strong>{{ selectedTrade()!.duration }}</strong></span>
+
+      <div class="detail-header" *ngIf="selectedTrade()">
+        <button class="btn-back" (click)="backToTrades()">
+          <i class="ti ti-arrow-left"></i> Back
+        </button>
+        <div class="header-right">
+          <span class="header-date">{{ modalData()!.date }}</span>
+          <div class="badge-profit"
+            [class.loss]="tradeStatus() === 'closed-loss'"
+            [class.pending]="tradeStatus() === 'pending'">
+            <i class="ti ti-triangle-filled" *ngIf="tradeStatus() === 'closed-profit'"></i>
+            <i class="ti ti-triangle-inverted-filled" *ngIf="tradeStatus() === 'closed-loss'"></i>
+            <i class="ti ti-circle-filled" *ngIf="tradeStatus() === 'pending'"></i>
+            <span>{{ tradeStatus() === 'closed-profit' ? 'PROFIT' : tradeStatus() === 'closed-loss' ? 'LOSS' : 'PENDING' }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -122,45 +103,139 @@
 
     <!-- Trade list -->
     <ng-container *ngIf="!loadingModal() && !modalError() && !selectedTrade()">
-      <div class="trade-list" *ngIf="modalData()!.trades.length > 0; else noTrades">
-        <button
-          class="trade-btn"
-          *ngFor="let trade of modalData()!.trades; let i = index"
-          (click)="selectTrade(trade)"
-        >
-          {{ trade.symbol }} {{ trade.optionType === 0 ? 'C' : 'P' }}
-        </button>
-      </div>
+      <ng-container *ngIf="modalData()!.trades.length > 0; else noTrades">
+        <div class="trade-summary">
+          <div class="summary-pnl-card" [class.profit]="dayTotalPnl() >= 0" [class.loss]="dayTotalPnl() < 0">
+            <div class="summary-pnl-label">
+              <i class="ti ti-chart-bar"></i>
+              <span>Total PnL</span>
+            </div>
+            <div class="summary-pnl-amount">{{ dayTotalPnl() >= 0 ? '+' : '' }}${{ dayTotalPnl() | number:'1.0-0' }}</div>
+            <div class="summary-pnl-badge">
+              <i class="ti ti-trending-up" *ngIf="dayTotalPnl() >= 0"></i>
+              <i class="ti ti-trending-down" *ngIf="dayTotalPnl() < 0"></i>
+              <span>{{ dayTotalPnl() >= 0 ? 'PROFIT' : 'LOSS' }}</span>
+            </div>
+          </div>
+          <div class="summary-trades">
+            <div class="summary-trade-item" *ngFor="let trade of modalData()!.trades" (click)="selectTrade(trade)">
+              <div class="summary-trade-info">
+                <span class="summary-trade-symbol">{{ trade.symbol }} {{ trade.optionType === 0 ? 'C' : 'P' }}</span>
+                <span class="summary-trade-type">{{ trade.optionType === 0 ? 'Call option' : 'Put option' }}</span>
+              </div>
+              <div class="summary-trade-pnl" [class.pnl-positive]="trade.pnl >= 0" [class.pnl-negative]="trade.pnl < 0">
+                <span class="trade-amount">{{ trade.pnl >= 0 ? '+' : '' }}${{ trade.pnl | number:'1.0-0' }}</span>
+                <span class="trade-pct">({{ trade.pnlPercent | number:'1.1-1' }}%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="summary-footer">
+          <span>{{ modalData()!.trades.length }} trade{{ modalData()!.trades.length > 1 ? 's' : '' }} closed</span>
+        </div>
+      </ng-container>
       <ng-template #noTrades>
         <div class="modal-empty"><p>No trades found for this day.</p></div>
       </ng-template>
     </ng-container>
 
-    <!-- Trade images -->
-    <ng-container *ngIf="!loadingModal() && selectedTrade()">
-      <div class="modal-images-row" *ngIf="tradeImages().length > 0; else noImages">
-        <div class="modal-image-col">
-          <ng-container *ngIf="entryImage()">
-            <div class="image-label">Entry</div>
+    <!-- Trade detail body -->
+    <div class="trade-detail-body" *ngIf="!loadingModal() && selectedTrade()">
+
+      <!-- Symbol header -->
+      <div class="symbol-header">
+        <div class="symbol-avatar"><span>{{ selectedTrade()!.symbol }}</span></div>
+        <div class="symbol-info">
+          <div class="name">{{ selectedTrade()!.symbol }} — {{ selectedTrade()!.optionType === 0 ? 'Call' : 'Put' }} option</div>
+          <div class="sub">Strike {{ selectedTrade()!.strikePrice }} · Exp {{ selectedTrade()!.expirationDate | date:'yyyy-MM-dd' }} · Level {{ selectedTrade()!.level }}</div>
+        </div>
+        <div class="symbol-pnl">
+          <div class="amount" [class.pnl-positive]="selectedTrade()!.pnl >= 0" [class.pnl-negative]="selectedTrade()!.pnl < 0">
+            {{ selectedTrade()!.pnl >= 0 ? '+' : '' }}${{ selectedTrade()!.pnl | number:'1.2-2' }}
+          </div>
+          <div class="pct" [class.pnl-positive]="selectedTrade()!.pnl >= 0" [class.pnl-negative]="selectedTrade()!.pnl < 0">
+            {{ selectedTrade()!.pnlPercent | number:'1.2-2' }}%
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics row 1 -->
+      <div class="grid-4">
+        <div class="metric">
+          <div class="label">Entry price</div>
+          <div class="value">${{ selectedTrade()!.entryPrice }}</div>
+        </div>
+        <div class="metric">
+          <div class="label">Exit price</div>
+          <div class="value">${{ selectedTrade()!.exitPrice }}</div>
+        </div>
+        <div class="metric">
+          <div class="label">Contracts</div>
+          <div class="value">{{ selectedTrade()!.contracts }}</div>
+        </div>
+        <div class="metric">
+          <div class="label">Target</div>
+          <div class="value">{{ selectedTrade()!.targetPercent }}%</div>
+        </div>
+      </div>
+
+      <!-- Metrics row 2 -->
+      <div class="grid-3">
+        <div class="metric">
+          <div class="label">Premium</div>
+          <div class="value">${{ selectedTrade()!.entryPrice * 100 * selectedTrade()!.contracts | number:'1.2-2' }}</div>
+        </div>
+        <div class="metric">
+          <div class="label">Duration</div>
+          <div class="value">{{ selectedTrade()!.duration }}</div>
+        </div>
+        <div class="metric" [class.success]="tradeStatus() !== 'pending'" [class.pending-metric]="tradeStatus() === 'pending'">
+          <div class="label">Status</div>
+          <div class="status-row">
+            <div class="status-dot" [class.pending-dot]="tradeStatus() === 'pending'"></div>
+            <span class="status-text" [class.pending-text]="tradeStatus() === 'pending'">
+              {{ tradeStatus() === 'pending' ? 'Pending' : 'Closed' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-label">Charts</div>
+
+      <div class="grid-2">
+        <div class="chart-box">
+          <div class="chart-header"><span>Entry</span></div>
+          <ng-container *ngIf="entryImage(); else entryPlaceholder">
             <img [src]="entryImage()!.s3Url" alt="Entry chart" />
           </ng-container>
+          <ng-template #entryPlaceholder>
+            <div class="chart-placeholder">
+              <i class="ti ti-photo-off"></i>
+              <span class="label">No screenshot</span>
+            </div>
+          </ng-template>
         </div>
-        <div class="modal-image-col">
-          <ng-container *ngIf="exitImage()">
-            <div class="image-label">Close</div>
+        <div class="chart-box">
+          <div class="chart-header"><span>Close</span></div>
+          <ng-container *ngIf="exitImage(); else exitPlaceholder">
             <img [src]="exitImage()!.s3Url" alt="Close chart" />
           </ng-container>
+          <ng-template #exitPlaceholder>
+            <div class="chart-placeholder">
+              <i class="ti ti-photo-off"></i>
+              <span class="label">No screenshot</span>
+            </div>
+          </ng-template>
         </div>
       </div>
-      <ng-template #noImages>
-        <div class="modal-empty"><p>No entry/exit images for this trade.</p></div>
-      </ng-template>
 
-      <div class="modal-tradelog" *ngIf="tradeLogImage()">
-        <div class="image-label">Trade Log</div>
+      <div class="chart-box full-width" *ngIf="tradeLogImage()">
+        <div class="chart-header"><span>Trade log</span></div>
         <img [src]="tradeLogImage()!.s3Url" alt="Trade log" />
       </div>
-    </ng-container>
+
+    </div>
 
   </div>
 </div>
