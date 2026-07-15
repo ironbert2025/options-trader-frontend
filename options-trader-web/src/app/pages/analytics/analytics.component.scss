@@ -1,0 +1,321 @@
+:host {
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.app {
+  display: flex;
+  width: 100%;
+  max-width: 1080px;
+  min-height: 700px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+// ── Sidebar ──
+.sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  background: #1e2a3a;
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.logout-item {
+  margin-top: auto;
+  width: 100%;
+  border: none;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+}
+
+.sidebar-brand {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0.5rem 0.75rem; margin-bottom: 1.5rem;
+
+  i    { font-size: 14px; color: #f59e0b; }
+  span { font-size: 13px; font-weight: 500; color: #fff; }
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0.5rem 0.75rem; border-radius: 8px;
+  margin-bottom: 4px; cursor: pointer; text-decoration: none;
+
+  i    { font-size: 14px; color: #ffffff50; }
+  span { font-size: 13px; color: #ffffff80; }
+
+  &:hover { background: #243447; }
+
+  &.active {
+    background: #2a3a4f;
+
+    i    { color: #a3e635; }
+    span { color: #fff; font-weight: 500; }
+  }
+}
+
+// ── Main ──
+.main {
+  flex: 1;
+  background: #f1efe8;
+  padding: 1.25rem 1.5rem;
+  overflow: hidden;
+}
+
+// ── Header ──
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+
+  h1   { font-size: 20px; font-weight: 500; color: #2c2c2a; margin-bottom: 2px; }
+  .sub { font-size: 12px; color: #888780; }
+}
+
+// Period toggle
+.period-toggle {
+  display: flex;
+  background: #fff;
+  border: 0.5px solid #d3d1c7;
+  border-radius: 8px;
+  overflow: hidden;
+
+  button {
+    padding: 5px 14px;
+    font-size: 11px;
+    border: none;
+    background: none;
+    color: #888780;
+    cursor: pointer;
+
+    &.active {
+      background: #1e2a3a;
+      color: #fff;
+      font-weight: 500;
+    }
+  }
+}
+
+// ── Cards ──
+.card {
+  background: #fff;
+  border: 0.5px solid #d3d1c7;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #2c2c2a;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .insight {
+    font-size: 10px;
+    color: #888780;
+    font-weight: 400;
+  }
+}
+
+// ── Grids ──
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin-bottom: 8px; }
+
+// ── KPI strip ──
+.kpi-card {
+  background: #fff;
+  border: 0.5px solid #d3d1c7;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+
+  .label { font-size: 10px; color: #888780; margin-bottom: 3px; }
+  .value { font-size: 15px; font-weight: 500; color: #2c2c2a; }
+  .value.profit { color: #3b6d11; }
+  .value.loss   { color: #a32d2d; }
+  .sub          { font-size: 10px; color: #888780; margin-top: 2px; }
+}
+
+// ── Bar chart: PnL by day of week ──
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 100px;
+  padding-bottom: 20px;
+  position: relative;
+}
+
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+  justify-content: flex-end;
+  gap: 3px;
+}
+
+.bar-val {
+  font-size: 8px;
+  color: #888780;
+
+  &.profit { color: #3b6d11; }
+  &.loss   { color: #a32d2d; }
+}
+
+.bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+
+  &.profit  { background: #eaf3de; border: 0.5px solid #639922; }
+  &.loss    { background: #fcebeb; border: 0.5px solid #a32d2d; }
+  &.empty   { background: #f1efe8; height: 4px !important; border-radius: 3px; }
+  &.pending { background: #faeeda; border: 0.5px solid #ba7517; }
+}
+
+.bar-day { font-size: 9px; color: #888780; }
+
+// ── Symbol breakdown ──
+.symbol-row {
+  margin-bottom: 10px;
+
+  &:last-child { margin-bottom: 0; }
+}
+
+.symbol-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.symbol-name  { font-size: 11px; font-weight: 500; color: #2c2c2a; }
+.symbol-stats {
+  font-size: 10px;
+  color: #888780;
+
+  .profit { color: #3b6d11; }
+  .loss   { color: #a32d2d; }
+}
+
+.progress-bar {
+  background: #f1efe8;
+  border-radius: 4px;
+  height: 7px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+
+  &.profit { background: #639922; }
+  &.loss   { background: #a32d2d; }
+}
+
+// ── Scatter plot ──
+.scatter-wrap {
+  position: relative;
+  background: #f8f7f4;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 100px;
+}
+
+.scatter-dot {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+
+  &.profit { background: #639922; opacity: 0.75; }
+  &.loss   { background: #a32d2d; opacity: 0.75; }
+}
+
+.scatter-axis-label {
+  position: absolute;
+  font-size: 8px;
+  color: #888780;
+}
+
+.sweet-spot-zone {
+  position: absolute;
+  left: 35%;
+  top: 8%;
+  width: 28%;
+  height: 55%;
+  border: 1px dashed #97c459;
+  border-radius: 6px;
+  background: #eaf3de;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+// ── Duration histogram ──
+.hist-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+
+  &:last-child { margin-bottom: 0; }
+}
+
+.hist-label { font-size: 10px; color: #888780; width: 55px; flex-shrink: 0; }
+.hist-bar-wrap { flex: 1; background: #f1efe8; border-radius: 4px; height: 16px; }
+
+.hist-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding-left: 6px;
+
+  span { font-size: 9px; color: #fff; font-weight: 500; }
+
+  &.profit { background: #639922; }
+  &.mixed  { background: #ba7517; }
+  &.loss   { background: #a32d2d; }
+}
+
+.hist-count { font-size: 10px; color: #888780; width: 30px; text-align: right; }
+
+// ── Stat items ──
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.stat-item {
+  background: #f1efe8;
+  border-radius: 7px;
+  padding: 7px 8px;
+
+  .s-label { font-size: 9px; color: #888780; margin-bottom: 2px; }
+  .s-value { font-size: 13px; font-weight: 500; color: #2c2c2a; }
+  .s-value.profit { color: #3b6d11; }
+  .s-value.loss   { color: #a32d2d; }
+}
+
+// ── Insight banner ──
+.insight-banner {
+  background: #fff8ec;
+  border: 0.5px solid #f0c070;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+
+  i { font-size: 14px; color: #f59e0b; flex-shrink: 0; margin-top: 1px; }
+  p { font-size: 11px; color: #854f0b; line-height: 1.5; }
+  strong { color: #633806; }
+}

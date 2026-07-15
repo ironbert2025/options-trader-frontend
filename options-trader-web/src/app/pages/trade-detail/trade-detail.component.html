@@ -1,0 +1,145 @@
+<div class="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <i class="ti ti-triangle-filled"></i>
+      <span>OptionsTrader</span>
+    </div>
+    <a class="nav-item" routerLink="/dashboard"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></a>
+    <a class="nav-item" routerLink="/journal"><i class="ti ti-calendar"></i><span>Trading Journal</span></a>
+    <a class="nav-item" routerLink="/analytics"><i class="ti ti-chart-line"></i><span>Analytics</span></a>
+    <a class="nav-item active" routerLink="/trades"><i class="ti ti-list"></i><span>Trade Log</span></a>
+    <button class="nav-item logout-item" (click)="logout()"><i class="ti ti-logout"></i><span>Logout</span></button>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <div class="card">
+
+      <!-- Header -->
+      <div class="detail-header">
+        <button class="btn-back" routerLink="/trades">
+          <i class="ti ti-arrow-left"></i> Back
+        </button>
+        <div class="header-right" *ngIf="trade() as t">
+          <span class="header-date">{{ t.tradeDate }}</span>
+          <div class="badge-profit"
+            [class.loss]="status() === 'closed-loss'"
+            [class.pending]="status() === 'pending'">
+            <i class="ti ti-triangle-filled" *ngIf="status() === 'closed-profit'"></i>
+            <i class="ti ti-triangle-inverted-filled" *ngIf="status() === 'closed-loss'"></i>
+            <i class="ti ti-circle-filled" *ngIf="status() === 'pending'"></i>
+            <span>{{ status() === 'closed-profit' ? 'PROFIT' : status() === 'closed-loss' ? 'LOSS' : 'PENDING' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="state-message" *ngIf="loading()">
+        <span class="spinner"></span>
+        <p>Loading trade...</p>
+      </div>
+
+      <!-- Not found -->
+      <div class="state-message" *ngIf="!loading() && notFound()">
+        <p>Trade not found.</p>
+      </div>
+
+      <!-- Detail body -->
+      <div class="trade-detail-body" *ngIf="!loading() && trade() as t">
+
+        <div class="symbol-header">
+          <div class="symbol-avatar"><span>{{ t.symbol }}</span></div>
+          <div class="symbol-info">
+            <div class="name">{{ t.symbol }} &mdash; {{ t.optionType === 0 ? 'Call' : 'Put' }} option</div>
+            <div class="sub">Strike {{ t.strikePrice }} &middot; Exp {{ t.expirationDate | date:'yyyy-MM-dd' }} &middot; Level {{ t.level }}</div>
+          </div>
+          <div class="symbol-pnl">
+            <div class="amount" [class.pnl-positive]="t.pnl >= 0" [class.pnl-negative]="t.pnl < 0">
+              {{ t.pnl >= 0 ? '+' : '' }}${{ t.pnl | number:'1.2-2' }}
+            </div>
+            <div class="pct" [class.pnl-positive]="t.pnl >= 0" [class.pnl-negative]="t.pnl < 0">
+              {{ t.pnlPercent != null ? (t.pnlPercent | number:'1.2-2') + '%' : '&mdash;' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-4">
+          <div class="metric">
+            <div class="label">Entry price</div>
+            <div class="value">${{ t.entryPrice }}</div>
+          </div>
+          <div class="metric">
+            <div class="label">Exit price</div>
+            <div class="value">${{ t.exitPrice }}</div>
+          </div>
+          <div class="metric">
+            <div class="label">Contracts</div>
+            <div class="value">{{ t.contracts }}</div>
+          </div>
+          <div class="metric">
+            <div class="label">Target</div>
+            <div class="value">{{ t.targetPercent }}%</div>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="metric">
+            <div class="label">Premium</div>
+            <div class="value">${{ t.entryPrice * 100 * t.contracts | number:'1.2-2' }}</div>
+          </div>
+          <div class="metric">
+            <div class="label">Duration</div>
+            <div class="value">{{ t.duration }}</div>
+          </div>
+          <div class="metric" [class.success]="status() !== 'pending'" [class.pending-metric]="status() === 'pending'">
+            <div class="label">Status</div>
+            <div class="status-row">
+              <div class="status-dot" [class.pending-dot]="status() === 'pending'"></div>
+              <span class="status-text" [class.pending-text]="status() === 'pending'">
+                {{ status() === 'pending' ? 'Pending' : 'Closed' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-label">Charts</div>
+
+        <div class="grid-2">
+          <div class="chart-box">
+            <div class="chart-header"><span>Entry</span></div>
+            <ng-container *ngIf="entryImage(); else entryPlaceholder">
+              <img [src]="entryImage()!.s3Url" alt="Entry chart" />
+            </ng-container>
+            <ng-template #entryPlaceholder>
+              <div class="chart-placeholder">
+                <i class="ti ti-photo-off"></i>
+                <span class="label">No screenshot</span>
+              </div>
+            </ng-template>
+          </div>
+          <div class="chart-box">
+            <div class="chart-header"><span>Close</span></div>
+            <ng-container *ngIf="exitImage(); else exitPlaceholder">
+              <img [src]="exitImage()!.s3Url" alt="Close chart" />
+            </ng-container>
+            <ng-template #exitPlaceholder>
+              <div class="chart-placeholder">
+                <i class="ti ti-photo-off"></i>
+                <span class="label">No screenshot</span>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <div class="chart-box full-width" *ngIf="tradeLogImage()">
+          <div class="chart-header"><span>Trade log</span></div>
+          <img [src]="tradeLogImage()!.s3Url" alt="Trade log" />
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

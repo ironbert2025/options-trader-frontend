@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { KpiSummary, RecentTrade, EquityPoint, ConsistencyDay, QuickStat } from './dashboard.model';
 import { TradeService, Trade as ApiTrade } from '../../services/trade.service';
+import { AuthService } from '../../services/auth.service';
 
 interface DayAgg {
   date: Date;
@@ -47,7 +48,12 @@ export class DashboardComponent implements OnInit {
     'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
   ];
 
-  constructor(private router: Router, private tradeService: TradeService) {}
+  constructor(private router: Router, private tradeService: TradeService, private authService: AuthService) {}
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/home']);
+  }
 
   ngOnInit() {
     this.inputsProvided = !!this.kpi;
@@ -258,7 +264,7 @@ export class DashboardComponent implements OnInit {
     return withTime.slice(0, 4).map(({ trade: t, entryShot }) => {
       const [y, m, d] = t.tradeDate.split('-').map(Number);
       const entryTime = entryShot
-        ? new Date(entryShot.capturedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+        ? new Date(entryShot.capturedAt + 'Z').toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/New_York' })
         : '--:--';
 
       return {

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Trade, DayGroup, WeekSummary } from './trade-log.model';
 import { TradeService, Trade as ApiTrade } from '../../services/trade.service';
+import { AuthService } from '../../services/auth.service';
 
 interface DisplayRow {
   kind: 'day' | 'empty-range';
@@ -38,13 +39,18 @@ export class TradeLogComponent implements OnChanges, OnInit {
   weekdayShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   weekdayLong = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  constructor(private router: Router, private tradeService: TradeService) {}
+  constructor(private router: Router, private tradeService: TradeService, private authService: AuthService) {}
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/home']);
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['trades'] && this.trades?.length) {
       this.inputProvided = true;
       this.tradesSignal.set(this.trades);
-      this.currentWeekIndex.set(0);
+      this.currentWeekIndex.set(this.currentWeekIndexForToday());
       this.currentPage.set(1);
     }
   }
@@ -56,9 +62,23 @@ export class TradeLogComponent implements OnChanges, OnInit {
       this.tradeService.getTradesByMonth(monthStr).subscribe(apiTrades => {
         if (!this.inputProvided) {
           this.tradesSignal.set(apiTrades.map(t => this.mapApiTrade(t)));
+          this.currentWeekIndex.set(this.currentWeekIndexForToday());
         }
       });
     }
+  }
+
+  private currentWeekIndexForToday(): number {
+    const today = new Date();
+    const weeks = this.weeks();
+    const index = weeks.findIndex(w =>
+      w.dayGroups.some(g =>
+        g.date.getFullYear() === today.getFullYear() &&
+        g.date.getMonth() === today.getMonth() &&
+        g.date.getDate() === today.getDate()
+      )
+    );
+    return index === -1 ? Math.max(0, weeks.length - 1) : index;
   }
 
   private mapApiTrade(t: ApiTrade): Trade {
@@ -66,7 +86,7 @@ export class TradeLogComponent implements OnChanges, OnInit {
     const isClosed = t.pnlPercent != null;
     const entryShot = t.screenshots.find(s => s.s3Url.endsWith('_entry.png'));
     const entryTime = entryShot
-      ? new Date(entryShot.capturedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+      ? new Date(entryShot.capturedAt + 'Z').toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/New_York' })
       : '--:--';
 
     return {

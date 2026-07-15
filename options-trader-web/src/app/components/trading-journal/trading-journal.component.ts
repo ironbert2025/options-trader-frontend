@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TradeDay, WeekSummary, MonthSummary } from './trading-journal.model';
+import { AuthService } from '../../services/auth.service';
 
 interface CalendarCell {
   dayNumber: number | null;
@@ -42,6 +43,13 @@ export class TradingJournalComponent implements OnChanges {
   ];
 
   weekDayHeaders = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+  constructor(private router: Router, private authService: AuthService) {}
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/home']);
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['tradeDays']) {

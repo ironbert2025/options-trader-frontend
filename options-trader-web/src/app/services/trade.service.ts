@@ -50,4 +50,11 @@ export class TradeService {
     });
     return this.http.get<Trade[]>(`${this.baseUrl}/trades?date=${date}`, { headers });
   }
+
+  getTradeById(id: string | number): Observable<Trade> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${this.auth.getToken()}`,
+    });
+    return this.http.get<Trade>(`${this.baseUrl}/trades/${id}`, { headers });
+  }
 }

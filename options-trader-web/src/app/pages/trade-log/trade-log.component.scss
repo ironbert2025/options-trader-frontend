@@ -18,6 +18,17 @@
   flex-shrink: 0;
   background: #1e2a3a;
   padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.logout-item {
+  margin-top: auto;
+  width: 100%;
+  border: none;
+  background: none;
+  font-family: inherit;
+  text-align: left;
 }
 
 .sidebar-brand {
@@ -270,6 +281,8 @@
 .pnl-profit  { color: #3b6d11 !important; font-weight: 500; }
 .pnl-loss    { color: #a32d2d !important; font-weight: 500; }
 .dur         { color: #888780 !important; }
+.type-call   { color: #3b6d11 !important; font-weight: 500; }
+.type-put    { color: #a32d2d !important; font-weight: 500; }
 
 .status-badge {
   font-size: 10px;
@@ -326,7 +339,7 @@
     text-align: right;
 
     &:first-child { padding-left: 14px; text-align: left; }
-    &:nth-child(2), &:nth-child(3) { text-align: left; }
+    &:nth-child(2), &:nth-child(3), &:nth-child(4) { text-align: left; }
     &:last-child { padding-right: 14px; }
   }
 
@@ -344,8 +357,9 @@
     color: #2c2c2a;
 
     &:first-child { padding-left: 14px; text-align: left; }
-    &:nth-child(2) { font-weight: 500; text-align: left; }
-    &:nth-child(3) { text-align: left; color: #888780; }
+    &:nth-child(2) { text-align: left; color: #888780; }
+    &:nth-child(3) { font-weight: 500; text-align: left; }
+    &:nth-child(4) { text-align: left; color: #888780; }
     &:last-child { padding-right: 14px; }
   }
 }

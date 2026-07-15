@@ -18,6 +18,17 @@
   flex-shrink: 0;
   background: #1e2a3a;
   padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.logout-item {
+  margin-top: auto;
+  width: 100%;
+  border: none;
+  background: none;
+  font-family: inherit;
+  text-align: left;
 }
 
 .sidebar-brand {
