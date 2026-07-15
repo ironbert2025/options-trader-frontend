@@ -56,6 +56,7 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.userFullName = this.authService.getUserFullName();
     this.inputsProvided = !!this.kpi;
     if (this.inputsProvided) {
       this.kpiSignal.set(this.kpi);
@@ -71,6 +72,8 @@ export class DashboardComponent implements OnInit {
       this.buildFromTrades(trades);
     });
   }
+
+  userFullName: string | null = null;
 
   greeting = computed<string>(() => {
     const hour = this.today.getHours();
