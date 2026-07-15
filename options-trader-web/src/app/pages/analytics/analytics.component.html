@@ -1,0 +1,193 @@
+<div class="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <i class="ti ti-triangle-filled"></i>
+      <span>OptionsTrader</span>
+    </div>
+    <a class="nav-item" routerLink="/dashboard"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></a>
+    <a class="nav-item" routerLink="/journal"><i class="ti ti-calendar"></i><span>Trading Journal</span></a>
+    <a class="nav-item active" routerLink="/analytics"><i class="ti ti-chart-line"></i><span>Analytics</span></a>
+    <a class="nav-item" routerLink="/trades"><i class="ti ti-list"></i><span>Trade Log</span></a>
+    <button class="nav-item logout-item" (click)="logout()"><i class="ti ti-logout"></i><span>Logout</span></button>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <h1>Analytics</h1>
+        <p class="sub">Performance breakdown &mdash; {{ periodLabel() }}</p>
+      </div>
+      <div class="period-toggle">
+        <button [class.active]="period() === 'week'" (click)="setPeriod('week')">Week</button>
+        <button [class.active]="period() === 'month'" (click)="setPeriod('month')">Month</button>
+        <button [class.active]="period() === 'alltime'" (click)="setPeriod('alltime')">All time</button>
+      </div>
+    </div>
+
+    <!-- KPI strip -->
+    <div class="grid-4" style="margin-bottom:8px;">
+      <div class="kpi-card">
+        <div class="label">Total PnL</div>
+        <div class="value" [class.profit]="summary().totalPnl >= 0" [class.loss]="summary().totalPnl < 0">{{ formatPnl(summary().totalPnl) }}</div>
+        <div class="sub">{{ summary().totalTrades }} trades</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Win rate</div>
+        <div class="value">{{ summary().winRate }}%</div>
+        <div class="sub">{{ summary().winningTrades }}W &middot; {{ summary().losingTrades }}L</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Profit factor</div>
+        <div class="value">{{ summary().profitFactor | number:'1.2-2' }}</div>
+        <div class="sub">Avg win / Avg loss</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Avg duration</div>
+        <div class="value">{{ summary().avgDuration }}</div>
+        <div class="sub">min {{ summary().minDuration }} &middot; max {{ summary().maxDuration }}</div>
+      </div>
+    </div>
+
+    <!-- Row 1: Day of week bars + Symbol breakdown -->
+    <div class="grid-2">
+
+      <!-- PnL by day of week -->
+      <div class="card">
+        <div class="card-title">
+          PnL by day of week
+          <span class="insight">Best day: {{ bestDay() }}</span>
+        </div>
+        <div class="bar-chart">
+          <div class="bar-col" *ngFor="let day of dayOfWeekStats()">
+            <span class="bar-val" [class.profit]="day.status === 'profit'" [class.loss]="day.status === 'loss'">
+              {{ day.status === 'pending' ? 'pend.' : (day.status === 'empty' ? '$0' : formatPnl(day.totalPnl)) }}
+            </span>
+            <div class="bar"
+              [class.profit]="day.status === 'profit'"
+              [class.loss]="day.status === 'loss'"
+              [class.pending]="day.status === 'pending'"
+              [class.empty]="day.status === 'empty'"
+              [style.height.px]="dayBarHeight(day)"
+            ></div>
+            <span class="bar-day">{{ day.day }}</span>
+          </div>
+        </div>
+        <div class="insight-banner" style="margin-top:0;">
+          <i class="ti ti-bulb"></i>
+          <p><strong>Insight:</strong> {{ dayOfWeekInsight() }}</p>
+        </div>
+      </div>
+
+      <!-- Symbol breakdown -->
+      <div class="card">
+        <div class="card-title">By symbol &amp; type</div>
+
+        <div class="symbol-row" *ngFor="let s of symbolStats()">
+          <div class="symbol-header">
+            <span class="symbol-name">{{ s.symbol }} {{ s.type }}</span>
+            <span class="symbol-stats">
+              <span [class.profit]="s.isProfit" [class.loss]="!s.isProfit">{{ formatPnl(s.totalPnl) }}</span>
+              &middot; {{ s.tradeCount }} trade{{ s.tradeCount !== 1 ? 's' : '' }} &middot; {{ s.winRate }}% WR
+            </span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" [class.profit]="s.isProfit" [class.loss]="!s.isProfit" [style.width.%]="s.pctOfTotal"></div></div>
+        </div>
+
+        <div style="margin-top:12px;" class="stat-grid">
+          <div class="stat-item">
+            <div class="s-label">Avg winner</div>
+            <div class="s-value profit">{{ formatPnl(summary().avgWinner) }}</div>
+          </div>
+          <div class="stat-item">
+            <div class="s-label">Avg loser</div>
+            <div class="s-value loss">{{ formatPnl(summary().avgLoser) }}</div>
+          </div>
+          <div class="stat-item">
+            <div class="s-label">Largest win</div>
+            <div class="s-value profit">{{ formatPnl(summary().largestWin) }}</div>
+          </div>
+          <div class="stat-item">
+            <div class="s-label">Largest loss</div>
+            <div class="s-value loss">{{ formatPnl(summary().largestLoss) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Duration histogram + PnL % distribution + Scatter -->
+    <div class="grid-3">
+
+      <!-- Duration histogram -->
+      <div class="card">
+        <div class="card-title">
+          Trade duration
+          <span class="insight">Avg {{ summary().avgDuration }}</span>
+        </div>
+        <div style="margin-top:4px;">
+          <div class="hist-bar-row" *ngFor="let b of durationBuckets()">
+            <span class="hist-label">{{ b.label }}</span>
+            <div class="hist-bar-wrap">
+              <div class="hist-bar-fill" [class.profit]="b.status === 'profit'" [class.mixed]="b.status === 'mixed'" [class.loss]="b.status === 'loss'" [style.width.%]="b.pctOfMax">
+                <span *ngIf="b.count > 0">{{ b.count }}</span>
+              </div>
+            </div>
+            <span class="hist-count">{{ b.count }}T</span>
+          </div>
+        </div>
+        <div class="insight-banner">
+          <i class="ti ti-bulb"></i>
+          <p><strong>Sweet spot:</strong> {{ sweetSpotRange() }} trades are your most profitable bracket.</p>
+        </div>
+      </div>
+
+      <!-- PnL % distribution -->
+      <div class="card">
+        <div class="card-title">PnL % distribution</div>
+        <div style="margin-top:4px;">
+          <div class="hist-bar-row" *ngFor="let b of pnlBuckets()">
+            <span class="hist-label" [style.color]="b.label === '< 0%' ? '#a32d2d' : null">{{ b.label }}</span>
+            <div class="hist-bar-wrap">
+              <div class="hist-bar-fill" [class.profit]="b.status === 'profit'" [class.mixed]="b.status === 'mixed'" [class.loss]="b.status === 'loss'" [style.width.%]="b.pctOfMax">
+                <span *ngIf="b.count > 0">{{ b.count }}</span>
+              </div>
+            </div>
+            <span class="hist-count">{{ b.count }}T</span>
+          </div>
+        </div>
+        <div class="insight-banner">
+          <i class="ti ti-bulb"></i>
+          <p><strong>Insight:</strong> {{ pnlDistributionInsight() }}</p>
+        </div>
+      </div>
+
+      <!-- Duration vs PnL scatter -->
+      <div class="card">
+        <div class="card-title">Duration vs PnL</div>
+        <div class="scatter-wrap">
+          <div class="scatter-dot"
+            *ngFor="let point of scatterPoints()"
+            [class.profit]="point.status === 'profit'"
+            [class.loss]="point.status === 'loss'"
+            [ngStyle]="scatterDotStyle(point)"
+          ></div>
+          <span class="scatter-axis-label" style="bottom:4px;left:6px;">0 min</span>
+          <span class="scatter-axis-label" style="bottom:4px;right:6px;">90 min</span>
+          <span class="scatter-axis-label" style="top:4px;left:6px;color:#3b6d11;">High PnL</span>
+          <span class="scatter-axis-label" style="bottom:16px;left:6px;color:#a32d2d;">Low PnL</span>
+          <div class="sweet-spot-zone"></div>
+        </div>
+        <div class="insight-banner">
+          <i class="ti ti-bulb"></i>
+          <p><strong>Pattern:</strong> Peak performance around <strong>{{ sweetSpotRange() }}</strong>.</p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>

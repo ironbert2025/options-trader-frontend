@@ -6,10 +6,26 @@
       <i class="ti ti-triangle-filled"></i>
       <span>OptionsTrader</span>
     </div>
-    <div class="sidebar-item">
+    <a class="nav-item" routerLink="/dashboard">
+      <i class="ti ti-layout-dashboard"></i>
+      <span>Dashboard</span>
+    </a>
+    <a class="nav-item active" routerLink="/journal">
       <i class="ti ti-calendar"></i>
       <span>Trading Journal</span>
-    </div>
+    </a>
+    <a class="nav-item" routerLink="/analytics">
+      <i class="ti ti-chart-line"></i>
+      <span>Analytics</span>
+    </a>
+    <a class="nav-item" routerLink="/trades">
+      <i class="ti ti-list"></i>
+      <span>Trade Log</span>
+    </a>
+    <button class="nav-item logout-item" (click)="logout()">
+      <i class="ti ti-logout"></i>
+      <span>Logout</span>
+    </button>
   </div>
 
   <!-- Main -->

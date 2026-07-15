@@ -13,12 +13,12 @@ interface ModalData {
 }
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-journal',
   imports: [CommonModule, DatePipe, TradingJournalComponent],
-  templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss',
+  templateUrl: './journal.html',
+  styleUrl: './journal.scss',
 })
-export class Dashboard implements OnInit {
+export class Journal implements OnInit {
   today = new Date();
   currentYear = signal(this.today.getFullYear());
   currentMonth = signal(this.today.getMonth());
