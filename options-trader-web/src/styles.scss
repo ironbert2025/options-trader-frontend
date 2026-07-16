@@ -29,8 +29,9 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
-  background-color: var(--parchment);
+  background-color: #e8e6df;
   color: var(--body);
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

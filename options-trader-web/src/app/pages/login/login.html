@@ -1,27 +1,69 @@
-<div class="login-wrapper">
-  <div class="login-card">
-    <div class="login-header">
-      <span class="brand-mark">&#9650;</span>
-      <h2>OptionsTrader</h2>
-      <p class="login-sub">Sign in to your account</p>
-    </div>
+<div class="login-wrap">
 
-    <form class="login-form" (submit)="onSubmit(); $event.preventDefault()">
-      <div class="form-group">
+  <!-- Brand -->
+  <div class="brand">
+    <i class="ti ti-triangle-filled"></i>
+    <h1>OptionsTrader</h1>
+    <p>Sign in to your account</p>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+    <form (submit)="onSubmit(); $event.preventDefault()">
+
+      <!-- Username field -->
+      <div class="field">
         <label for="username">Username</label>
-        <input id="username" type="text" placeholder="username" [(ngModel)]="username" name="username" autocomplete="username" />
+        <div class="input-row">
+          <i class="ti ti-user"></i>
+          <input id="username" type="text" placeholder="Enter username" [(ngModel)]="username" name="username" autocomplete="username" />
+        </div>
       </div>
 
-      <div class="form-group">
+      <!-- Password field -->
+      <div class="field">
         <label for="password">Password</label>
-        <input id="password" type="password" placeholder="••••••••" [(ngModel)]="password" name="password" autocomplete="current-password" />
+        <div class="input-row">
+          <i class="ti ti-lock"></i>
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            placeholder="Enter password"
+            [(ngModel)]="password"
+            name="password"
+            autocomplete="current-password"
+          />
+          <button class="toggle-pw" type="button" (click)="togglePassword()">
+            <i class="ti" [class.ti-eye-off]="!showPassword()" [class.ti-eye]="showPassword()"></i>
+          </button>
+        </div>
       </div>
 
-      <p class="error-msg" *ngIf="error()">{{ error() }}</p>
+      <!-- Remember me + Forgot -->
+      <div class="remember-row">
+        <label class="remember-left">
+          <input type="checkbox" />
+          <span>Remember me</span>
+        </label>
+        <a class="forgot-link">Forgot password?</a>
+      </div>
 
-      <button type="submit" class="btn-submit" [disabled]="loading()">
+      <!-- Error -->
+      <p class="error-msg" *ngIf="error()">
+        <i class="ti ti-alert-circle"></i>
+        <span>{{ error() }}</span>
+      </p>
+
+      <!-- Sign In -->
+      <button type="submit" class="btn-signin" [disabled]="loading()">
+        <i class="ti ti-login"></i>
         {{ loading() ? 'Signing in…' : 'Sign In' }}
       </button>
+
     </form>
   </div>
+
+  <!-- Footer -->
+  <div class="footer">2026 OptionsTrader &mdash; Personal trading journal</div>
+
 </div>

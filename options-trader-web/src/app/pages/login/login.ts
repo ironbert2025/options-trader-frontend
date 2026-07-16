@@ -15,6 +15,11 @@ export class Login {
   password = '';
   loading = signal(false);
   error = signal('');
+  showPassword = signal(false);
+
+  togglePassword() {
+    this.showPassword.update(v => !v);
+  }
 
   constructor(private router: Router, private auth: AuthService) {}
 

@@ -1,0 +1,30 @@
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <i class="ti ti-triangle-filled"></i>
+    <span>OptionsTrader</span>
+  </div>
+  <nav>
+    <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+      <i class="ti ti-layout-dashboard"></i>
+      <span>Dashboard</span>
+    </a>
+    <a class="nav-item" routerLink="/journal" routerLinkActive="active">
+      <i class="ti ti-calendar"></i>
+      <span>Trading Journal</span>
+    </a>
+    <a class="nav-item" routerLink="/analytics" routerLinkActive="active">
+      <i class="ti ti-chart-line"></i>
+      <span>Analytics</span>
+    </a>
+    <a class="nav-item" routerLink="/trades" routerLinkActive="active">
+      <i class="ti ti-list"></i>
+      <span>Trade Log</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="btn-logout" (click)="logout()">
+      <i class="ti ti-logout"></i>
+      <span>Sign out</span>
+    </button>
+  </div>
+</aside>

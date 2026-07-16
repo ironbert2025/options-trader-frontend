@@ -1,9 +1,8 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { Trade, DayGroup, WeekSummary } from './trade-log.model';
 import { TradeService, Trade as ApiTrade } from '../../services/trade.service';
-import { AuthService } from '../../services/auth.service';
 
 interface DisplayRow {
   kind: 'day' | 'empty-range';
@@ -15,7 +14,7 @@ interface DisplayRow {
 @Component({
   selector: 'app-trade-log',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './trade-log.component.html',
   styleUrl: './trade-log.component.scss',
 })
@@ -39,12 +38,7 @@ export class TradeLogComponent implements OnChanges, OnInit {
   weekdayShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   weekdayLong = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  constructor(private router: Router, private tradeService: TradeService, private authService: AuthService) {}
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/home']);
-  }
+  constructor(private router: Router, private tradeService: TradeService) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['trades'] && this.trades?.length) {

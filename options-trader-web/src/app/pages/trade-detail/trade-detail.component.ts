@@ -1,8 +1,7 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TradeService, Trade, TradeScreenshot } from '../../services/trade.service';
-import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-trade-detail',
@@ -18,9 +17,7 @@ export class TradeDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
-    private tradeService: TradeService,
-    private authService: AuthService
+    private tradeService: TradeService
   ) {}
 
   ngOnInit() {
@@ -41,11 +38,6 @@ export class TradeDetailComponent implements OnInit {
         this.loading.set(false);
       },
     });
-  }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/home']);
   }
 
   entryImage = computed<TradeScreenshot | null>(() => {
