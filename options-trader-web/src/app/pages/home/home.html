@@ -1,65 +1,110 @@
+<!-- Nav -->
 <nav class="navbar">
-  <div class="navbar-brand">
-    <span class="brand-mark">&#9650;</span>
-    <span class="brand-name">OptionsTrader</span>
+  <a class="nav-brand" href="#">
+    <i class="ti ti-triangle-filled"></i>
+    <span>OptionsTrader</span>
+  </a>
+  <div class="nav-links">
+    <a href="#">Features</a>
+    <a href="#">Markets</a>
+    <a href="#">About</a>
   </div>
-  <ul class="navbar-links">
-    <li><a href="#">Features</a></li>
-    <li><a href="#">Markets</a></li>
-    <li><a href="#">About</a></li>
-    <li><a routerLink="/login" class="btn-login">Sign In</a></li>
-  </ul>
+  <div class="nav-actions">
+    <a class="btn-ghost" routerLink="/login">Sign In</a>
+    <a class="btn-primary" routerLink="/login">
+      <i class="ti ti-rocket"></i>
+      Get Started
+    </a>
+  </div>
 </nav>
 
-<main>
-  <section class="hero">
-    <div class="hero-content">
-      <span class="hero-eyebrow">Options Trading Journal</span>
-      <h1>Every trade<br>tells a story.</h1>
-      <p class="hero-sub">
-        Track every position, review your decisions, and build the discipline that separates consistent traders from everyone else.
-      </p>
-      <a routerLink="/login" class="btn-primary">Open Your Journal</a>
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-label">Options Trading Journal</div>
+    <h1>Every trade<br />tells a <em>story.</em></h1>
+    <p>Track every position, review your decisions, and build the discipline that separates consistent traders from everyone else.</p>
+    <div class="hero-actions">
+      <button class="btn-cta" (click)="openJournal()">
+        <i class="ti ti-book"></i>
+        Open Your Journal
+      </button>
+      <button class="btn-secondary">
+        <i class="ti ti-player-play"></i>
+        See how it works
+      </button>
     </div>
+  </div>
 
-    <div class="hero-visual">
-      <div class="mock-calendar">
-        <div class="mock-day profit">
-          <span class="mock-date">Jun 17</span>
-          <span class="mock-pnl">+$842</span>
-          <span class="mock-sym">AAPL C</span>
+  <div class="hero-visual">
+    <div class="visual-card">
+      <div class="visual-header">
+        <span class="title">Trading Journal</span>
+        <span class="date">June 2026</span>
+      </div>
+
+      <div class="trade-preview-row" *ngFor="let trade of trades">
+        <div class="trade-bar" [class.profit]="trade.status === 'profit'" [class.loss]="trade.status === 'loss'"></div>
+        <div class="trade-preview-info">
+          <div class="d">{{ trade.date }}</div>
+          <div class="sym">{{ trade.symbol }}</div>
         </div>
-        <div class="mock-day loss">
-          <span class="mock-date">Jun 18</span>
-          <span class="mock-pnl">−$310</span>
-          <span class="mock-sym">TSLA P</span>
+        <span class="trade-preview-pnl" [class.profit]="trade.status === 'profit'" [class.loss]="trade.status === 'loss'">{{ trade.pnl }}</span>
+      </div>
+
+      <div class="mini-strip">
+        <div class="mini-metric">
+          <div class="ml">Month PnL</div>
+          <div class="mv profit">+$2,891</div>
         </div>
-        <div class="mock-day profit">
-          <span class="mock-date">Jun 23</span>
-          <span class="mock-pnl">+$1,240</span>
-          <span class="mock-sym">SPY C</span>
+        <div class="mini-metric">
+          <div class="ml">Win rate</div>
+          <div class="mv">78%</div>
+        </div>
+        <div class="mini-metric">
+          <div class="ml">Streak</div>
+          <div class="mv">&#128293; 4 days</div>
         </div>
       </div>
-      <p class="mock-caption">Your real trade history, visualized by day</p>
-    </div>
-  </section>
 
-  <section class="features">
-    <div class="feature-card">
-      <h3>Calendar View</h3>
-      <p>Every trading day color-coded by outcome. Profit and loss at a glance — no spreadsheet required.</p>
+      <div class="visual-footer">Your real trade history, visualized by day</div>
     </div>
-    <div class="feature-card">
-      <h3>Trade Charts</h3>
-      <p>Entry and exit screenshots for every position. See exactly what you saw when you pulled the trigger.</p>
-    </div>
-    <div class="feature-card">
-      <h3>P&amp;L Tracking</h3>
-      <p>Premium paid, net P&amp;L, duration, and target percent. The numbers don't lie — use them to improve.</p>
-    </div>
-  </section>
-</main>
+  </div>
+</section>
 
+<!-- Stats strip -->
+<div class="stats-outer">
+  <div class="stats-strip">
+    <div class="stat-block" *ngFor="let stat of stats">
+      <div class="sv">{{ stat.value }}<span>{{ stat.accent }}</span></div>
+      <div class="sl">{{ stat.label }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Features -->
+<section class="features">
+  <div class="features-inner">
+    <div class="features-label">What you get</div>
+    <h2>Built for options traders,<br />not spreadsheets.</h2>
+    <div class="features-grid">
+      <div class="feature-card" *ngFor="let feature of features" [style.--border-color]="feature.borderColor">
+        <div class="feature-icon" [class.green]="feature.iconClass === 'green'" [class.navy]="feature.iconClass === 'navy'" [class.amber]="feature.iconClass === 'amber'">
+          <i class="ti" [class]="feature.icon"></i>
+        </div>
+        <h3>{{ feature.title }}</h3>
+        <p>{{ feature.desc }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
 <footer class="footer">
-  <p>&copy; 2026 OptionsTrader &mdash; Personal trading journal.</p>
+  <div class="footer-brand">
+    <i class="ti ti-triangle-filled"></i>
+    <span>OptionsTrader</span>
+  </div>
+  <p>&copy; 2026 OptionsTrader &mdash; Personal trading journal</p>
+  <p class="footer-right">Built for traders, by traders.</p>
 </footer>
