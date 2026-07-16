@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { KpiSummary, RecentTrade, EquityPoint, ConsistencyDay, QuickStat } from './dashboard.model';
 import { TradeService, Trade as ApiTrade } from '../../services/trade.service';
 import { AuthService } from '../../services/auth.service';
@@ -17,7 +17,7 @@ interface DayAgg {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -49,11 +49,6 @@ export class DashboardComponent implements OnInit {
   ];
 
   constructor(private router: Router, private tradeService: TradeService, private authService: AuthService) {}
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/home']);
-  }
 
   ngOnInit() {
     this.userFullName = this.authService.getUserFullName();

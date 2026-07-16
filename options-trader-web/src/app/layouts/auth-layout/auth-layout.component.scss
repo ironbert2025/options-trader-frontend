@@ -1,0 +1,23 @@
+:host {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: flex;
+  width: 100%;
+  max-width: 1080px;
+  min-height: 600px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.main-content {
+  flex: 1;
+  background: #f1efe8;
+  border-radius: 0 12px 12px 0;
+  overflow: hidden;
+}

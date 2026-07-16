@@ -1,6 +1,5 @@
 import { Component, Input, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
 import {
   AnalyticsSummary,
   DayOfWeekStat,
@@ -11,7 +10,6 @@ import {
 } from './analytics.model';
 import { Trade } from '../trade-log/trade-log.model';
 import { TradeService, Trade as ApiTrade } from '../../services/trade.service';
-import { AuthService } from '../../services/auth.service';
 
 const DAY_NAMES: DayOfWeekStat['day'][] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DAY_FULL_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -33,7 +31,7 @@ const PNL_BUCKET_DEFS = [
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './analytics.component.html',
   styleUrl: './analytics.component.scss',
 })
@@ -50,12 +48,7 @@ export class AnalyticsComponent implements OnInit {
     'July', 'August', 'September', 'October', 'November', 'December',
   ];
 
-  constructor(private tradeService: TradeService, private router: Router, private authService: AuthService) {}
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/home']);
-  }
+  constructor(private tradeService: TradeService) {}
 
   ngOnInit() {
     this.inputProvided = !!this.trades?.length;
