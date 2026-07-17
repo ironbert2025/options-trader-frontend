@@ -10,12 +10,14 @@ import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
+  { path: '', pathMatch: 'full', component: Home },
+  { path: 'home', component: Home },
+  { path: 'login', component: Login },
   {
     path: '',
     component: AuthLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'journal', component: Journal },
       { path: 'analytics', component: AnalyticsComponent },
@@ -23,6 +25,4 @@ export const routes: Routes = [
       { path: 'trades/:id', component: TradeDetailComponent },
     ],
   },
-  { path: 'login', component: Login },
-  { path: 'home', component: Home },
 ];
