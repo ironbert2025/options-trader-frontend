@@ -1,12 +1,12 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { CommonModule, Location } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { TradeService, Trade, TradeScreenshot } from '../../services/trade.service';
 
 @Component({
   selector: 'app-trade-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './trade-detail.component.html',
   styleUrl: './trade-detail.component.scss',
 })
@@ -17,8 +17,13 @@ export class TradeDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private tradeService: TradeService
+    private tradeService: TradeService,
+    private location: Location
   ) {}
+
+  goBack() {
+    this.location.back();
+  }
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
