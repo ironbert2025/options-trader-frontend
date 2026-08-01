@@ -24,6 +24,10 @@ export class TradeLogComponent implements OnChanges, OnInit {
   private tradesSignal = signal<Trade[]>([]);
   private inputProvided = false;
 
+  private today = new Date();
+  currentYear = signal(this.today.getFullYear());
+  currentMonth = signal(this.today.getMonth());
+
   viewMode = signal<'week' | 'month'>('week');
   currentWeekIndex = signal(0);
   activeFilter = signal<'all' | 'profit' | 'loss'>('all');
@@ -51,15 +55,39 @@ export class TradeLogComponent implements OnChanges, OnInit {
 
   ngOnInit() {
     if (!this.inputProvided) {
-      const today = new Date();
-      const monthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-      this.tradeService.getTradesByMonth(monthStr).subscribe(apiTrades => {
-        if (!this.inputProvided) {
-          this.tradesSignal.set(apiTrades.map(t => this.mapApiTrade(t)));
-          this.currentWeekIndex.set(this.currentWeekIndexForToday());
-        }
-      });
+      this.loadMonth();
     }
+  }
+
+  private loadMonth() {
+    const monthStr = `${this.currentYear()}-${String(this.currentMonth() + 1).padStart(2, '0')}`;
+    this.tradeService.getTradesByMonth(monthStr).subscribe(apiTrades => {
+      if (!this.inputProvided) {
+        this.tradesSignal.set(apiTrades.map(t => this.mapApiTrade(t)));
+        this.currentWeekIndex.set(this.currentWeekIndexForToday());
+        this.currentPage.set(1);
+      }
+    });
+  }
+
+  prevMonth() {
+    if (this.currentMonth() === 0) {
+      this.currentMonth.set(11);
+      this.currentYear.update(y => y - 1);
+    } else {
+      this.currentMonth.update(m => m - 1);
+    }
+    this.loadMonth();
+  }
+
+  nextMonth() {
+    if (this.currentMonth() === 11) {
+      this.currentMonth.set(0);
+      this.currentYear.update(y => y + 1);
+    } else {
+      this.currentMonth.update(m => m + 1);
+    }
+    this.loadMonth();
   }
 
   private currentWeekIndexForToday(): number {
@@ -103,10 +131,8 @@ export class TradeLogComponent implements OnChanges, OnInit {
 
   weeks = computed<WeekSummary[]>(() => {
     const trades = this.tradesSignal();
-    if (trades.length === 0) return [];
-
-    const year = trades[0].date.getFullYear();
-    const month = trades[0].date.getMonth();
+    const year = this.currentYear();
+    const month = this.currentMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     const byDate = new Map<string, Trade[]>();
@@ -259,9 +285,7 @@ export class TradeLogComponent implements OnChanges, OnInit {
   });
 
   pageSubtitle = computed<string>(() => {
-    const trades = this.tradesSignal();
-    if (trades.length === 0) return '';
-    const monthLabel = `${this.monthNames[trades[0].date.getMonth()]} ${trades[0].date.getFullYear()}`;
+    const monthLabel = `${this.monthNames[this.currentMonth()]} ${this.currentYear()}`;
 
     if (this.viewMode() === 'month') {
       return `${monthLabel} · All trades`;
