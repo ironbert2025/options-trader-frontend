@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Trade, DayGroup, WeekSummary } from './trade-log.model';
 import { TradeService, Trade as ApiTrade } from '../../services/trade.service';
 
@@ -24,6 +24,10 @@ export class TradeLogComponent implements OnChanges, OnInit {
   private tradesSignal = signal<Trade[]>([]);
   private inputProvided = false;
 
+  private today = new Date();
+  currentYear = signal(this.today.getFullYear());
+  currentMonth = signal(this.today.getMonth());
+
   viewMode = signal<'week' | 'month'>('week');
   currentWeekIndex = signal(0);
   activeFilter = signal<'all' | 'profit' | 'loss'>('all');
@@ -38,7 +42,9 @@ export class TradeLogComponent implements OnChanges, OnInit {
   weekdayShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   weekdayLong = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  constructor(private router: Router, private tradeService: TradeService) {}
+  private pendingWeekIndex: number | null = null;
+
+  constructor(private router: Router, private route: ActivatedRoute, private tradeService: TradeService) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['trades'] && this.trades?.length) {
@@ -51,15 +57,83 @@ export class TradeLogComponent implements OnChanges, OnInit {
 
   ngOnInit() {
     if (!this.inputProvided) {
-      const today = new Date();
-      const monthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-      this.tradeService.getTradesByMonth(monthStr).subscribe(apiTrades => {
-        if (!this.inputProvided) {
-          this.tradesSignal.set(apiTrades.map(t => this.mapApiTrade(t)));
-          this.currentWeekIndex.set(this.currentWeekIndexForToday());
-        }
-      });
+      this.restoreFromQueryParams();
+      this.loadMonth(/* resetState */ false);
     }
+  }
+
+  private restoreFromQueryParams() {
+    const params = this.route.snapshot.queryParamMap;
+    const year = params.get('year');
+    const month = params.get('month');
+    const week = params.get('week');
+    const view = params.get('view');
+    const filter = params.get('filter');
+    const page = params.get('page');
+
+    if (year) this.currentYear.set(Number(year));
+    if (month) this.currentMonth.set(Number(month));
+    if (view === 'week' || view === 'month') this.viewMode.set(view);
+    if (filter === 'all' || filter === 'profit' || filter === 'loss') this.activeFilter.set(filter);
+    if (page) this.currentPage.set(Number(page));
+    this.pendingWeekIndex = week != null ? Number(week) : null;
+  }
+
+  private syncQueryParams() {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        year: this.currentYear(),
+        month: this.currentMonth(),
+        week: this.currentWeekIndex(),
+        view: this.viewMode(),
+        filter: this.activeFilter(),
+        page: this.currentPage(),
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  private loadMonth(resetState: boolean) {
+    const monthStr = `${this.currentYear()}-${String(this.currentMonth() + 1).padStart(2, '0')}`;
+    this.tradeService.getTradesByMonth(monthStr).subscribe(apiTrades => {
+      if (this.inputProvided) return;
+
+      this.tradesSignal.set(apiTrades.map(t => this.mapApiTrade(t)));
+
+      if (resetState) {
+        this.currentWeekIndex.set(this.currentWeekIndexForToday());
+        this.currentPage.set(1);
+      } else if (this.pendingWeekIndex != null) {
+        this.currentWeekIndex.set(this.pendingWeekIndex);
+        this.pendingWeekIndex = null;
+      } else {
+        this.currentWeekIndex.set(this.currentWeekIndexForToday());
+      }
+
+      this.syncQueryParams();
+    });
+  }
+
+  prevMonth() {
+    if (this.currentMonth() === 0) {
+      this.currentMonth.set(11);
+      this.currentYear.update(y => y - 1);
+    } else {
+      this.currentMonth.update(m => m - 1);
+    }
+    this.loadMonth(true);
+  }
+
+  nextMonth() {
+    if (this.currentMonth() === 11) {
+      this.currentMonth.set(0);
+      this.currentYear.update(y => y + 1);
+    } else {
+      this.currentMonth.update(m => m + 1);
+    }
+    this.loadMonth(true);
   }
 
   private currentWeekIndexForToday(): number {
@@ -103,10 +177,8 @@ export class TradeLogComponent implements OnChanges, OnInit {
 
   weeks = computed<WeekSummary[]>(() => {
     const trades = this.tradesSignal();
-    if (trades.length === 0) return [];
-
-    const year = trades[0].date.getFullYear();
-    const month = trades[0].date.getMonth();
+    const year = this.currentYear();
+    const month = this.currentMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     const byDate = new Map<string, Trade[]>();
@@ -259,9 +331,7 @@ export class TradeLogComponent implements OnChanges, OnInit {
   });
 
   pageSubtitle = computed<string>(() => {
-    const trades = this.tradesSignal();
-    if (trades.length === 0) return '';
-    const monthLabel = `${this.monthNames[trades[0].date.getMonth()]} ${trades[0].date.getFullYear()}`;
+    const monthLabel = `${this.monthNames[this.currentMonth()]} ${this.currentYear()}`;
 
     if (this.viewMode() === 'month') {
       return `${monthLabel} · All trades`;
@@ -274,25 +344,30 @@ export class TradeLogComponent implements OnChanges, OnInit {
   prevWeek() {
     this.currentWeekIndex.update(i => Math.max(0, i - 1));
     this.collapsedIndices.set(new Set());
+    this.syncQueryParams();
   }
 
   nextWeek() {
     this.currentWeekIndex.update(i => Math.min(this.weeks().length - 1, i + 1));
     this.collapsedIndices.set(new Set());
+    this.syncQueryParams();
   }
 
   setView(v: 'week' | 'month') {
     this.viewMode.set(v);
+    this.syncQueryParams();
   }
 
   setFilter(f: 'all' | 'profit' | 'loss') {
     this.activeFilter.set(f);
     this.currentPage.set(1);
     this.collapsedIndices.set(new Set());
+    this.syncQueryParams();
   }
 
   goToPage(page: number) {
     this.currentPage.set(Math.min(Math.max(1, page), this.totalPages()));
+    this.syncQueryParams();
   }
 
   toggleDayGroup(index: number) {

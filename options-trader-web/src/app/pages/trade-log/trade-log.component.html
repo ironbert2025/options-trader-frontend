@@ -6,10 +6,17 @@
       </div>
       <div class="header-controls">
 
+        <!-- Month nav -->
+        <div class="week-nav">
+          <button (click)="prevMonth()">&#8249;</button>
+          <span class="week-label">{{ monthNames[currentMonth()] }} {{ currentYear() }}</span>
+          <button (click)="nextMonth()">&#8250;</button>
+        </div>
+
         <!-- Week nav -->
         <div class="week-nav" *ngIf="viewMode() === 'week'">
           <button (click)="prevWeek()">&#8249;</button>
-          <span class="week-label">{{ currentWeek()?.label }}</span>
+          <span class="week-label">{{ currentWeek()?.label ?? 'No weeks' }}</span>
           <button (click)="nextWeek()">&#8250;</button>
         </div>
 

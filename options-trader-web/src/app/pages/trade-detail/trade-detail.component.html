@@ -2,7 +2,7 @@
 
       <!-- Header -->
       <div class="detail-header">
-        <button class="btn-back" routerLink="/trades">
+        <button class="btn-back" (click)="goBack()">
           <i class="ti ti-arrow-left"></i> Back
         </button>
         <div class="header-right" *ngIf="trade() as t">
