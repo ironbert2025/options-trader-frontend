@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { KpiSummary, RecentTrade, EquityPoint, ConsistencyDay, QuickStat } from './dashboard.model';
 import { TradeService, Trade as ApiTrade } from '../../services/trade.service';
 import { AuthService } from '../../services/auth.service';
+import { isEntryScreenshot } from '../../utils/screenshot.util';
 
 interface DayAgg {
   date: Date;
@@ -248,7 +249,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private buildRecentTrades(trades: ApiTrade[]): RecentTrade[] {
-    const withTime = trades.map(t => ({ trade: t, entryShot: t.screenshots.find(s => s.s3Url.endsWith('_entry.png')) }));
+    const withTime = trades.map(t => ({ trade: t, entryShot: t.screenshots.find(s => isEntryScreenshot(s.s3Url)) }));
 
     withTime.sort((a, b) => {
       const aTime = a.entryShot ? new Date(a.entryShot.capturedAt).getTime() : 0;

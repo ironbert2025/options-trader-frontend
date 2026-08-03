@@ -10,6 +10,7 @@ import {
 } from './analytics.model';
 import { Trade } from '../trade-log/trade-log.model';
 import { TradeService, Trade as ApiTrade } from '../../services/trade.service';
+import { isEntryScreenshot } from '../../utils/screenshot.util';
 
 const DAY_NAMES: DayOfWeekStat['day'][] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DAY_FULL_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -319,7 +320,7 @@ export class AnalyticsComponent implements OnInit {
   private mapApiTrade(t: ApiTrade): Trade {
     const [y, m, d] = t.tradeDate.split('-').map(Number);
     const isClosed = t.pnlPercent != null;
-    const entryShot = t.screenshots.find(s => s.s3Url.endsWith('_entry.png'));
+    const entryShot = t.screenshots.find(s => isEntryScreenshot(s.s3Url));
     const entryTime = entryShot
       ? new Date(entryShot.capturedAt + 'Z').toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/New_York' })
       : '--:--';

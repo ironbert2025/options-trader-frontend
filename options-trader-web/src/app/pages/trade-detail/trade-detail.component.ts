@@ -2,6 +2,7 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { TradeService, Trade, TradeScreenshot } from '../../services/trade.service';
+import { isEntryScreenshot, isExitScreenshot, isTradeLogScreenshot, isNewScreenshotFormat } from '../../utils/screenshot.util';
 
 @Component({
   selector: 'app-trade-detail',
@@ -48,19 +49,27 @@ export class TradeDetailComponent implements OnInit {
   entryImage = computed<TradeScreenshot | null>(() => {
     const t = this.trade();
     if (!t) return null;
-    return t.screenshots.find(s => s.s3Url.endsWith('_entry.png')) ?? null;
+    return t.screenshots.find(s => isEntryScreenshot(s.s3Url)) ?? null;
   });
 
   exitImage = computed<TradeScreenshot | null>(() => {
     const t = this.trade();
     if (!t) return null;
-    return t.screenshots.find(s => s.s3Url.endsWith('_exit.png')) ?? null;
+    return t.screenshots.find(s => isExitScreenshot(s.s3Url)) ?? null;
   });
 
   tradeLogImage = computed<TradeScreenshot | null>(() => {
     const t = this.trade();
     if (!t) return null;
-    return t.screenshots.find(s => s.s3Url.endsWith('_TradeLog.png')) ?? null;
+    return t.screenshots.find(s => isTradeLogScreenshot(s.s3Url)) ?? null;
+  });
+
+  // Newer screenshots ("_Entry.png"/"_Close.png") are much wider and need
+  // to be stacked instead of shown side by side.
+  useStackedCharts = computed<boolean>(() => {
+    const entry = this.entryImage();
+    const exit = this.exitImage();
+    return isNewScreenshotFormat(entry?.s3Url ?? exit?.s3Url ?? '');
   });
 
   status = computed<'pending' | 'closed-profit' | 'closed-loss'>(() => {

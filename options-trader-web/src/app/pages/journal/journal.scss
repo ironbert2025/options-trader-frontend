@@ -242,6 +242,12 @@
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-bottom: 8px;
+
+  // Newer screenshots are much wider (~986x275) — stack them instead of
+  // squeezing two side by side.
+  &.stacked {
+    grid-template-columns: 1fr;
+  }
 }
 
 .chart-box {
