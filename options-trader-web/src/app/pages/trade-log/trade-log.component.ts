@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Trade, DayGroup, WeekSummary } from './trade-log.model';
 import { TradeService, Trade as ApiTrade } from '../../services/trade.service';
+import { isEntryScreenshot } from '../../utils/screenshot.util';
 
 interface DisplayRow {
   kind: 'day' | 'empty-range';
@@ -152,7 +153,7 @@ export class TradeLogComponent implements OnChanges, OnInit {
   private mapApiTrade(t: ApiTrade): Trade {
     const [y, m, d] = t.tradeDate.split('-').map(Number);
     const isClosed = t.pnlPercent != null;
-    const entryShot = t.screenshots.find(s => s.s3Url.endsWith('_entry.png'));
+    const entryShot = t.screenshots.find(s => isEntryScreenshot(s.s3Url));
     const entryTime = entryShot
       ? new Date(entryShot.capturedAt + 'Z').toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/New_York' })
       : '--:--';

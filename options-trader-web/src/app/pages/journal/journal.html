@@ -147,7 +147,7 @@
       <!-- Charts -->
       <div class="charts-label">Charts</div>
 
-      <div class="grid-2">
+      <div class="grid-2" [class.stacked]="useStackedCharts()">
         <div class="chart-box">
           <div class="chart-header"><span>Entry</span></div>
           <ng-container *ngIf="entryImage(); else entryPlaceholder">

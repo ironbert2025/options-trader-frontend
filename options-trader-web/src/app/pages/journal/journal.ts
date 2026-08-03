@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { TradeService, Trade, TradeScreenshot } from '../../services/trade.service';
 import { TradingJournalComponent } from '../../components/trading-journal/trading-journal.component';
 import { TradeDay } from '../../components/trading-journal/trading-journal.model';
+import { isEntryScreenshot, isExitScreenshot, isTradeLogScreenshot, isNewScreenshotFormat } from '../../utils/screenshot.util';
 
 type TradeResult = 'profit' | 'loss' | 'pending';
 
@@ -66,7 +67,7 @@ export class Journal implements OnInit {
     const result: TradeDay[] = [];
     for (const [dateStr, dayTrades] of byDate) {
       const [y, m, d] = dateStr.split('-').map(Number);
-      const anyClosed = dayTrades.some(t => t.screenshots.some(s => s.s3Url.endsWith('_exit.png')));
+      const anyClosed = dayTrades.some(t => t.screenshots.some(s => isExitScreenshot(s.s3Url)));
       let status: TradeDay['status'];
       let pnl = 0;
       if (anyClosed) {
@@ -83,13 +84,21 @@ export class Journal implements OnInit {
   entryImage = computed<TradeScreenshot | null>(() => {
     const trade = this.selectedTrade();
     if (!trade) return null;
-    return trade.screenshots.find(s => s.s3Url.endsWith('_entry.png')) ?? null;
+    return trade.screenshots.find(s => isEntryScreenshot(s.s3Url)) ?? null;
   });
 
   exitImage = computed<TradeScreenshot | null>(() => {
     const trade = this.selectedTrade();
     if (!trade) return null;
-    return trade.screenshots.find(s => s.s3Url.endsWith('_exit.png')) ?? null;
+    return trade.screenshots.find(s => isExitScreenshot(s.s3Url)) ?? null;
+  });
+
+  // Newer screenshots ("_Entry.png"/"_Close.png") are much wider and need
+  // to be stacked instead of shown side by side.
+  useStackedCharts = computed<boolean>(() => {
+    const entry = this.entryImage();
+    const exit = this.exitImage();
+    return isNewScreenshotFormat(entry?.s3Url ?? exit?.s3Url ?? '');
   });
 
   dayTotalPnl = computed<number>(() => {
@@ -101,7 +110,7 @@ export class Journal implements OnInit {
   tradeStatus = computed<'pending' | 'closed-profit' | 'closed-loss'>(() => {
     const trade = this.selectedTrade();
     if (!trade) return 'pending';
-    const hasExit = trade.screenshots.some(s => s.s3Url.endsWith('_exit.png'));
+    const hasExit = trade.screenshots.some(s => isExitScreenshot(s.s3Url));
     if (!hasExit) return 'pending';
     return trade.pnl >= 0 ? 'closed-profit' : 'closed-loss';
   });
@@ -109,7 +118,7 @@ export class Journal implements OnInit {
   tradeLogImage = computed<TradeScreenshot | null>(() => {
     const trade = this.selectedTrade();
     if (!trade) return null;
-    return trade.screenshots.find(s => s.s3Url.endsWith('_TradeLog.png')) ?? null;
+    return trade.screenshots.find(s => isTradeLogScreenshot(s.s3Url)) ?? null;
   });
 
   onJournalMonthChanged(e: { year: number; month: number }) {
@@ -123,7 +132,7 @@ export class Journal implements OnInit {
     const dayTrades = this.monthTrades().filter(t => t.tradeDate === dateStr);
     if (dayTrades.length === 0) return;
 
-    const anyClosed = dayTrades.some(t => t.screenshots.some(s => s.s3Url.endsWith('_exit.png')));
+    const anyClosed = dayTrades.some(t => t.screenshots.some(s => isExitScreenshot(s.s3Url)));
     let result: TradeResult;
     if (anyClosed) {
       const totalPnl = dayTrades.reduce((sum, t) => sum + t.pnl, 0);
