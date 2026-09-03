@@ -22,7 +22,7 @@ The actual Angular project lives in [`options-trader-web/`](options-trader-web).
 - **Trade Log** (`/trades`) — week/month table view of all trades with filters (all/profit/loss) and pagination
 - **Trade Detail** (`/trades/:id`) — full detail view for a single trade, including entry/exit/trade-log chart screenshots
 
-All authenticated routes (`/dashboard`, `/journal`, `/analytics`, `/trades*`) are nested under a shared `AuthLayoutComponent` (sidebar + content shell) and protected by a route guard that redirects to `/login` if there's no valid session.
+All authenticated routes (`/dashboard`, `/journal`, `/analytics`, `/trades*`) are nested under a shared `AuthLayoutComponent` (sidebar + content shell) and protected by a route guard that redirects to `/login` if there's no valid session. The sidebar's "Sign out" button clears the token and sends you to `/home` (the landing page).
 
 ## Project structure
 
@@ -35,8 +35,15 @@ options-trader-web/
     shared/             # SidebarComponent
     services/           # AuthService, TradeService — talk to the backend API
     guards/             # authGuard — protects authenticated routes
+    utils/               # screenshot.util.ts — see below
     app.routes.ts       # route table
 ```
+
+## Notable implementation details
+
+**Screenshot naming conventions.** The WinForms capture app has used two naming schemes for trade screenshots over time: an older lowercase one (`_entry.png` / `_exit.png`) and a newer capitalized one (`_Entry.png` / `_Close.png`) that also produces noticeably wider images. `src/app/utils/screenshot.util.ts` centralizes matching for both conventions (`isEntryScreenshot`, `isExitScreenshot`, `isTradeLogScreenshot`, `isNewScreenshotFormat`). Trade Detail and the Journal's trade modal use `isNewScreenshotFormat()` to decide layout: newer (wider) screenshots are stacked entry-above-close, older ones stay side by side. Trade Log image is unaffected either way.
+
+**Trade Log state lives in the URL.** `TradeLogComponent` syncs its full view state — year, month, week index, week/month view mode, filter, and page — into the route's query params (`?year=...&month=...&week=...&view=...&filter=...&page=...`) on every change, using `replaceUrl: true` so it doesn't spam browser history. On load, it restores state from those params instead of always defaulting to the current month. This means the Trade Log URL is shareable/bookmarkable, and the Trade Detail page's Back button (`Location.back()`) reliably returns you to the exact list state you came from.
 
 ## Getting started
 
