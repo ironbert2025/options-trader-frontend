@@ -1,20 +1,20 @@
-# Imágenes de la guía de usuario
+# User guide images
 
-Guarda aquí los screenshots referenciados por [`../GUIA_USUARIO.md`](../GUIA_USUARIO.md), con estos nombres exactos:
+Save screenshots here, referenced by [`../USER_GUIDE.md`](../USER_GUIDE.md), using these exact filenames:
 
-| Archivo | Página / sección |
+| File | Page / section |
 |---|---|
 | `login.png` | `/login` |
 | `dashboard.png` | `/dashboard` |
-| `journal-calendar.png` | `/journal` — vista de calendario |
-| `journal-day-modal.png` | `/journal` — modal con lista de trades de un día |
-| `journal-trade-detail-modal.png` | `/journal` — detalle de un trade dentro del modal |
-| `trade-log-week.png` | `/trades` — vista semanal |
-| `trade-log-month.png` | `/trades` — vista mensual |
+| `journal-calendar.png` | `/journal` — calendar view |
+| `journal-day-modal.png` | `/journal` — modal with a day's trade list |
+| `journal-trade-detail-modal.png` | `/journal` — trade detail inside the modal |
+| `trade-log-week.png` | `/trades` — week view |
+| `trade-log-month.png` | `/trades` — month view |
 | `trade-detail-page.png` | `/trades/:id` |
-| `analytics-overview.png` | `/analytics` — vista general |
-| `analytics-day-of-week.png` | `/analytics` — gráfico de PnL por día de la semana |
-| `analytics-duration-scatter.png` | `/analytics` — scatter de duración vs PnL |
-| `sidebar-logout.png` | Sidebar — botón "Sign out" |
+| `analytics-overview.png` | `/analytics` — overview |
+| `analytics-day-of-week.png` | `/analytics` — PnL by day of week chart |
+| `analytics-duration-scatter.png` | `/analytics` — duration vs. PnL scatter |
+| `sidebar-logout.png` | Sidebar — "Sign out" button |
 
-Formato recomendado: PNG, ancho ~1200–1400px.
+Recommended format: PNG, ~1200–1400px wide.
